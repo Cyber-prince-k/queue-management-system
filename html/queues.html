@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Queues - QECH Queue System</title>
+  <link rel="stylesheet" href="../css/style.css" />
+</head>
+<body>
+  <header>
+    <div class="container">
+      <div class="logo-container">
+        <div>
+          <img src="https://via.placeholder.com/60x60/2c7fb8/ffffff?text=QECH" alt="QECH Logo" class="logo" />
+          <div>
+            <h1 data-i18n="hospital_name">Queen Elizabeth Central Hospital</h1>
+            <h2 data-i18n="system_name">Digital Queue Management System</h2>
+          </div>
+        </div>
+      </div>
+      <nav aria-label="Primary">
+        <ul>
+          <li><a class="btn btn-secondary" href="../index.html" data-i18n="nav_home">Home</a></li>
+          <li><a class="btn btn-secondary" href="patient.html" data-i18n="nav_patient">Patient</a></li>
+          <li><a class="btn btn-secondary" href="staff.html" data-i18n="nav_staff">Staff</a></li>
+          <li><a class="btn btn-secondary" href="admin.html" data-i18n="nav_admin">Admin</a></li>
+          <li><a class="btn btn-primary" href="display.html" data-i18n="nav_display">Public Display</a></li>
+          <li>
+            <label for="language-select" class="visually-hidden">Language</label>
+            <select id="language-select" aria-label="Language selector">
+              <option value="en">English</option>
+              <option value="ny">Chichewa</option>
+            </select>
+          </li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="card">
+      <div class="section-header">
+        <h2 data-i18n="nav_queues">Queues</h2>
+        <form id="queues-filter-form" class="control-buttons" style="margin:0;">
+          <div class="form-group" style="margin:0;">
+            <label for="queues-dept">Department</label>
+            <select id="queues-dept" name="queues-dept">
+              <option value="all">All</option>
+              <option value="opd">Outpatient Department (OPD)</option>
+              <option value="maternity">Maternity</option>
+              <option value="emergency">Emergency</option>
+              <option value="pediatrics">Pediatrics</option>
+            </select>
+          </div>
+          <div class="form-group" style="margin:0;">
+            <label for="queues-priority">Priority</label>
+            <select id="queues-priority" name="queues-priority">
+              <option value="all">All</option>
+              <option value="priority">Priority Only</option>
+              <option value="regular">Regular Only</option>
+            </select>
+          </div>
+          <button type="submit" class="btn btn-primary">Apply</button>
+        </form>
+      </div>
+
+      <div class="department-queues">
+        <div class="department-queue" data-queues-section="opd">
+          <h3 data-i18n="dept_opd">Outpatient Department (OPD)</h3>
+          <div data-queue-list="opd" class="queue-display"></div>
+        </div>
+        <div class="department-queue" data-queues-section="maternity">
+          <h3 data-i18n="dept_maternity">Maternity</h3>
+          <div data-queue-list="maternity" class="queue-display"></div>
+        </div>
+        <div class="department-queue" data-queues-section="emergency">
+          <h3 data-i18n="dept_emergency">Emergency</h3>
+          <div data-queue-list="emergency" class="queue-display"></div>
+        </div>
+        <div class="department-queue" data-queues-section="pediatrics">
+          <h3 data-i18n="dept_pediatrics">Pediatrics</h3>
+          <div data-queue-list="pediatrics" class="queue-display"></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-section">
+          <h3>About QECH</h3>
+          <p>Queen Elizabeth Central Hospital is Malawi's largest referral hospital, providing quality healthcare services to the nation.</p>
+        </div>
+        <div class="footer-section">
+          <h3>Quick Links</h3>
+          <ul>
+            <li><a href="patient.html">Patient Portal</a></li>
+            <li><a href="staff.html">Staff Portal</a></li>
+            <li><a href="admin.html">Admin Portal</a></li>
+            <li><a href="display.html">Public Display</a></li>
+          </ul>
+        </div>
+        <div class="footer-section">
+          <h3>Contact</h3>
+          <p>Queen Elizabeth Central Hospital<br>
+          Blantyre, Malawi<br>
+          Phone: +265 1 871 111</p>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p data-i18n="footer_line1">&copy; 2023 Queen Elizabeth Central Hospital - Digital Queue Management System</p>
+        
+      </div>
+    </div>
+  </footer>
+
+  <script src="../js/auth.js"></script>
+  <script src="../js/style.js"></script>
+  <script>
+    // Initial populate
+    if (typeof updateQueuesOverview === 'function') {
+      updateQueuesOverview();
+    }
+
+    // Filter logic for queues overview using DOM toggles
+    document.getElementById('queues-filter-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const dept = document.getElementById('queues-dept').value;
+      const priority = document.getElementById('queues-priority').value;
+
+      // Always start from full render
+      if (typeof updateQueuesOverview === 'function') updateQueuesOverview();
+
+      document.querySelectorAll('[data-queues-section]').forEach(sec => {
+        const code = sec.getAttribute('data-queues-section');
+        // Department filter
+        sec.style.display = (dept !== 'all' && dept !== code) ? 'none' : '';
+
+        // Priority filter by hiding items
+        const list = sec.querySelector('[data-queue-list]');
+        if (!list) return;
+        const items = list.querySelectorAll('.queue-item');
+        items.forEach(item => {
+          if (priority === 'all') {
+            item.style.display = '';
+          } else if (priority === 'priority') {
+            item.style.display = item.classList.contains('priority-item') ? '' : 'none';
+          } else if (priority === 'regular') {
+            item.style.display = item.classList.contains('priority-item') ? 'none' : '';
+          }
+        });
+      });
+    });
+  </script>
+</body>
+</html>

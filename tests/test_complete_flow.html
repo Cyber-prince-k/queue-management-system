@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Complete Flow Test - QECH Queue System</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 2rem;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    h1 {
+      color: white;
+      text-align: center;
+      margin-bottom: 2rem;
+      font-size: 2rem;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+    .card {
+      background: white;
+      border-radius: 12px;
+      padding: 1.5rem;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    }
+    .card h2 {
+      color: #667eea;
+      margin-bottom: 1rem;
+      font-size: 1.3rem;
+      border-bottom: 2px solid #667eea;
+      padding-bottom: 0.5rem;
+    }
+    .status {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: bold;
+      margin-left: 0.5rem;
+    }
+    .status.online { background: #d1fae5; color: #065f46; }
+    .status.offline { background: #fee2e2; color: #991b1b; }
+    .status.pending { background: #fef3c7; color: #92400e; }
+    button {
+      background: #667eea;
+      color: white;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1rem;
+      width: 100%;
+      margin-top: 0.5rem;
+      transition: all 0.3s;
+    }
+    button:hover { background: #5568d3; transform: translateY(-2px); }
+    button:disabled { background: #9ca3af; cursor: not-allowed; transform: none; }
+    button.secondary { background: #6b7280; }
+    button.secondary:hover { background: #4b5563; }
+    button.danger { background: #ef4444; }
+    button.danger:hover { background: #dc2626; }
+    .log {
+      background: #1e293b;
+      color: #10b981;
+      padding: 1rem;
+      border-radius: 8px;
+      font-family: 'Courier New', monospace;
+      font-size: 0.85rem;
+      max-height: 300px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      word-break: break-word;
+      margin-top: 1rem;
+    }
+    .log .error { color: #ef4444; }
+    .log .success { color: #10b981; }
+    .log .info { color: #3b82f6; }
+    .log .warning { color: #f59e0b; }
+    .token-display {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: white;
+      padding: 2rem;
+      border-radius: 12px;
+      text-align: center;
+      margin-top: 1rem;
+      animation: slideIn 0.5s ease-out;
+    }
+    .token-number {
+      font-size: 2.5rem;
+      font-weight: bold;
+      font-family: monospace;
+      letter-spacing: 3px;
+      margin: 1rem 0;
+    }
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .queue-item {
+      background: #f8fafc;
+      padding: 1rem;
+      border-left: 4px solid #667eea;
+      border-radius: 4px;
+      margin-bottom: 0.5rem;
+    }
+    .queue-item.priority { border-left-color: #ef4444; background: #fef2f2; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🏥 QECH Queue System - Complete Flow Test</h1>
+    
+    <div class="grid">
+      <!-- System Status -->
+      <div class="card">
+        <h2>🔌 System Status</h2>
+        <div id="system-status">
+          <p>Server: <span class="status pending">Checking...</span></p>
+          <p>Database: <span class="status pending">Checking...</span></p>
+          <p>API: <span class="status pending">Checking...</span></p>
+        </div>
+        <button onclick="checkSystemStatus()">🔄 Refresh Status</button>
+      </div>
+
+      <!-- Create Token -->
+      <div class="card">
+        <h2>➕ Create Test Token</h2>
+        <button onclick="createToken()">Create Token</button>
+        <button onclick="createPriorityToken()" class="secondary">Create Priority Token</button>
+        <div id="token-result"></div>
+      </div>
+
+      <!-- View Queue -->
+      <div class="card">
+        <h2>📋 View Queue (Staff View)</h2>
+        <select id="dept-select" style="width: 100%; padding: 0.5rem; margin-bottom: 0.5rem; border-radius: 4px; border: 1px solid #d1d5db;">
+          <option value="opd">OPD</option>
+          <option value="maternity">Maternity</option>
+          <option value="emergency">Emergency</option>
+          <option value="pediatrics">Pediatrics</option>
+        </select>
+        <button onclick="viewQueue()">View Queue</button>
+        <button onclick="viewAllQueues()" class="secondary">View All Departments</button>
+        <div id="queue-result"></div>
+      </div>
+    </div>
+
+    <!-- Console Log -->
+    <div class="card">
+      <h2>📝 Console Log</h2>
+      <button onclick="clearLog()" class="danger" style="width: auto; float: right;">Clear Log</button>
+      <div style="clear: both;"></div>
+      <div id="console-log" class="log">System ready. Click buttons above to test...</div>
+    </div>
+  </div>
+
+  <script>
+    const API_BASE_URL = 'http://localhost/queue%20system/php/api';
+    let tokenCounter = 1;
+
+    function log(message, type = 'info') {
+      const logEl = document.getElementById('console-log');
+      const timestamp = new Date().toLocaleTimeString();
+      const line = document.createElement('div');
+      line.className = type;
+      line.textContent = `[${timestamp}] ${message}`;
+      logEl.appendChild(line);
+      logEl.scrollTop = logEl.scrollHeight;
+      console.log(`[${type.toUpperCase()}]`, message);
+    }
+
+    function clearLog() {
+      document.getElementById('console-log').innerHTML = 'Log cleared.';
+    }
+
+    async function checkSystemStatus() {
+      log('Checking system status...', 'info');
+      
+      // Check Server
+      try {
+        const response = await fetch(`${API_BASE_URL}/queue.php?action=status`, {
+          method: 'GET',
+          credentials: 'include'
+        });
+        
+        if (response.ok) {
+          updateStatus('Server', 'online');
+          log('✓ Server is online', 'success');
+          
+          const data = await response.json();
+          if (data.success !== undefined) {
+            updateStatus('Database', 'online');
+            updateStatus('API', 'online');
+            log('✓ Database connection successful', 'success');
+            log('✓ API is working', 'success');
+            log(`Found ${data.tokens ? data.tokens.length : 0} active tokens`, 'info');
+          }
+        } else {
+          throw new Error(`HTTP ${response.status}`);
+        }
+      } catch (error) {
+        updateStatus('Server', 'offline');
+        updateStatus('Database', 'offline');
+        updateStatus('API', 'offline');
+        log('✗ Cannot connect to server: ' + error.message, 'error');
+        log('⚠️ Make sure XAMPP is running (Apache + MySQL)', 'warning');
+      }
+    }
+
+    function updateStatus(component, status) {
+      const statusEl = document.querySelector(`#system-status p:contains("${component}") .status`);
+      if (statusEl) {
+        statusEl.className = `status ${status}`;
+        statusEl.textContent = status.toUpperCase();
+      } else {
+        // Fallback: update by index
+        const statuses = document.querySelectorAll('#system-status .status');
+        const index = component === 'Server' ? 0 : component === 'Database' ? 1 : 2;
+        if (statuses[index]) {
+          statuses[index].className = `status ${status}`;
+          statuses[index].textContent = status.toUpperCase();
+        }
+      }
+    }
+
+    async function createToken(isPriority = false) {
+      log('Creating test token...', 'info');
+      
+      const testData = {
+        patient_name: `Test Patient ${tokenCounter}`,
+        patient_age: isPriority ? 70 : 30,
+        patient_phone: `+265 999 ${String(tokenCounter).padStart(6, '0')}`,
+        patient_id_number: `TEST${tokenCounter}`,
+        patient_address: 'Test Address, Blantyre',
+        service_type: 'Test Consultation',
+        department: 'opd',
+        priority_type: isPriority ? 'elderly' : 'no'
+      };
+      
+      tokenCounter++;
+      
+      log('Sending data: ' + JSON.stringify(testData, null, 2), 'info');
+      
+      try {
+        const response = await fetch(`${API_BASE_URL}/queue.php?action=create`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify(testData)
+        });
+        
+        log(`Response status: ${response.status} ${response.statusText}`, 'info');
+        
+        const responseText = await response.text();
+        log('Raw response: ' + responseText, 'info');
+        
+        let data;
+        try {
+          data = JSON.parse(responseText);
+        } catch (e) {
+          throw new Error('Invalid JSON: ' + responseText);
+        }
+        
+        if (data.success) {
+          log('✓ TOKEN CREATED SUCCESSFULLY!', 'success');
+          log(`Token Number: ${data.token.token_number}`, 'success');
+          log(`Queue Position: ${data.token.queue_position}`, 'success');
+          
+          document.getElementById('token-result').innerHTML = `
+            <div class="token-display">
+              <div style="font-size: 3rem;">🎫</div>
+              <div style="font-size: 1.2rem; margin-bottom: 0.5rem;">Token Created!</div>
+              <div class="token-number">${data.token.token_number}</div>
+              <div>Position: #${data.token.queue_position}</div>
+            </div>
+          `;
+          
+          // Auto-refresh queue
+          setTimeout(() => viewQueue(), 500);
+        } else {
+          throw new Error(data.message || 'Token creation failed');
+        }
+      } catch (error) {
+        log('✗ Error: ' + error.message, 'error');
+        document.getElementById('token-result').innerHTML = `
+          <div style="background: #fee2e2; color: #991b1b; padding: 1rem; border-radius: 8px; margin-top: 1rem;">
+            <strong>Error:</strong> ${error.message}
+          </div>
+        `;
+      }
+    }
+
+    async function createPriorityToken() {
+      await createToken(true);
+    }
+
+    async function viewQueue() {
+      const dept = document.getElementById('dept-select').value;
+      log(`Fetching queue for ${dept.toUpperCase()}...`, 'info');
+      
+      try {
+        const response = await fetch(`${API_BASE_URL}/queue.php?action=status&department=${dept}`, {
+          method: 'GET',
+          credentials: 'include'
+        });
+        
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        
+        const data = await response.json();
+        
+        if (data.success) {
+          log(`✓ Found ${data.tokens.length} patients in ${dept.toUpperCase()} queue`, 'success');
+          
+          if (data.tokens.length === 0) {
+            document.getElementById('queue-result').innerHTML = `
+              <div style="text-align: center; padding: 2rem; color: #6b7280;">
+                No patients in queue
+              </div>
+            `;
+          } else {
+            let html = '<div style="margin-top: 1rem;">';
+            data.tokens.forEach((token, index) => {
+              const isPriority = token.priority_type !== 'no';
+              html += `
+                <div class="queue-item ${isPriority ? 'priority' : ''}">
+                  <strong>#${index + 1} - ${token.token_number}</strong><br>
+                  ${token.patient_name} (Age: ${token.patient_age})<br>
+                  ${isPriority ? `<span style="color: #ef4444;">⚠️ Priority: ${token.priority_type}</span><br>` : ''}
+                  <small>Status: ${token.status}</small>
+                </div>
+              `;
+            });
+            html += '</div>';
+            document.getElementById('queue-result').innerHTML = html;
+          }
+        } else {
+          throw new Error(data.message || 'Failed to get queue');
+        }
+      } catch (error) {
+        log('✗ Error fetching queue: ' + error.message, 'error');
+      }
+    }
+
+    async function viewAllQueues() {
+      log('Fetching all queues...', 'info');
+      
+      try {
+        const response = await fetch(`${API_BASE_URL}/queue.php?action=status`, {
+          method: 'GET',
+          credentials: 'include'
+        });
+        
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        
+        const data = await response.json();
+        
+        if (data.success) {
+          log(`✓ Found ${data.tokens.length} total patients across all departments`, 'success');
+          
+          // Group by department
+          const byDept = {};
+          data.tokens.forEach(token => {
+            const dept = token.department_code || 'unknown';
+            if (!byDept[dept]) byDept[dept] = [];
+            byDept[dept].push(token);
+          });
+          
+          let html = '<div style="margin-top: 1rem;">';
+          for (const dept in byDept) {
+            html += `<h3 style="color: #667eea; margin-top: 1rem;">${dept.toUpperCase()} (${byDept[dept].length})</h3>`;
+            byDept[dept].forEach((token, index) => {
+              const isPriority = token.priority_type !== 'no';
+              html += `
+                <div class="queue-item ${isPriority ? 'priority' : ''}" style="font-size: 0.9rem;">
+                  <strong>${token.token_number}</strong> - ${token.patient_name}
+                  ${isPriority ? `<span style="color: #ef4444;"> (${token.priority_type})</span>` : ''}
+                </div>
+              `;
+            });
+          }
+          html += '</div>';
+          document.getElementById('queue-result').innerHTML = html;
+        }
+      } catch (error) {
+        log('✗ Error: ' + error.message, 'error');
+      }
+    }
+
+    // Auto-check status on load
+    window.addEventListener('load', () => {
+      checkSystemStatus();
+    });
+  </script>
+</body>
+</html>

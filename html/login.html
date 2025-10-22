@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login - QECH Queue System</title>
+  <link rel="stylesheet" href="../css/style.css" />
+</head>
+<body>
+  <header>
+    <div class="container">
+      <div class="logo-container">
+        <div>
+          <img src="https://via.placeholder.com/60x60/2c7fb8/ffffff?text=QECH" alt="QECH Logo" class="logo" />
+          <div>
+            <h1 data-i18n="hospital_name">Queen Elizabeth Central Hospital</h1>
+            <h2 data-i18n="system_name">Digital Queue Management System</h2>
+          </div>
+        </div>
+      </div>
+      <nav aria-label="Primary">
+        <ul>
+          <li><a class="btn btn-secondary" href="../index.html" data-i18n="nav_home">Home</a></li>
+          <li><a class="btn btn-secondary" href="register.html">Create Account</a></li>
+          <li><a class="btn btn-primary" href="login.html">Login</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="card" style="max-width:560px;margin:0 auto;">
+      <div class="section-header">
+        <h2>Login</h2>
+      </div>
+      <form id="login-form">
+        <div class="form-group">
+          <label for="login-username">Username</label>
+          <input type="text" id="login-username" required />
+        </div>
+        <div class="form-group">
+          <label for="login-password">Password</label>
+          <input type="password" id="login-password" required />
+        </div>
+        <button type="submit" class="btn btn-primary">Login</button>
+      </form>
+      <p style="margin-top:0.75rem;">Don't have an account? <a href="register.html">Create one</a>.</p>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-section">
+          <h3>About QECH</h3>
+          <p>Queen Elizabeth Central Hospital is Malawi's largest referral hospital, providing quality healthcare services to the nation.</p>
+        </div>
+        <div class="footer-section">
+          <h3>Quick Links</h3>
+          <ul>
+            <li><a href="patient.html">Patient Portal</a></li>
+            <li><a href="staff.html">Staff Portal</a></li>
+            <li><a href="admin.html">Admin Portal</a></li>
+            <li><a href="display.html">Public Display</a></li>
+          </ul>
+        </div>
+        <div class="footer-section">
+          <h3>Contact</h3>
+          <p>Queen Elizabeth Central Hospital<br>
+          Blantyre, Malawi<br>
+          Phone: +265 1 871 111</p>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p data-i18n="footer_line1">&copy; 2023 Queen Elizabeth Central Hospital - Digital Queue Management System</p>
+      
+      </div>
+    </div>
+  </footer>
+
+  <script src="../js/auth.js"></script>
+  <script src="../js/style.js"></script>
+  <script>
+    // Login form handler
+    document.getElementById('login-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const username = document.getElementById('login-username').value;
+      const password = document.getElementById('login-password').value;
+      
+      const submitBtn = e.target.querySelector('button[type="submit"]');
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Logging in...';
+      
+      await login(username, password);
+      
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Login';
+    });
+  </script>
+</body>
+</html>

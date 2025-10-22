@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Inline Test - Token Creation</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 2rem auto;
+      padding: 2rem;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+    }
+    .card {
+      background: white;
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+      margin-bottom: 1rem;
+    }
+    h1 { color: #667eea; margin-top: 0; }
+    .form-group {
+      margin-bottom: 1rem;
+    }
+    label {
+      display: block;
+      margin-bottom: 0.25rem;
+      font-weight: bold;
+      color: #374151;
+    }
+    input, select {
+      width: 100%;
+      padding: 0.5rem;
+      border: 1px solid #d1d5db;
+      border-radius: 4px;
+      font-size: 1rem;
+    }
+    button {
+      background: #667eea;
+      color: white;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1rem;
+      width: 100%;
+      font-weight: bold;
+    }
+    button:hover { background: #5568d3; }
+    button:disabled { background: #9ca3af; cursor: not-allowed; }
+    .result {
+      margin-top: 1rem;
+      padding: 1rem;
+      border-radius: 8px;
+    }
+    .success { background: #d1fae5; color: #065f46; }
+    .error { background: #fee2e2; color: #991b1b; }
+    pre {
+      background: #1e293b;
+      color: #10b981;
+      padding: 1rem;
+      border-radius: 4px;
+      overflow-x: auto;
+      font-size: 0.85rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>🧪 Inline Token Creation Test</h1>
+    <p>This page has the createQueueToken function <strong>inline</strong> (not from external file).</p>
+    
+    <form id="test-form">
+      <div class="form-group">
+        <label>Patient Name *</label>
+        <input type="text" id="patient-name" value="Test Patient" required>
+      </div>
+      
+      <div class="form-group">
+        <label>Age *</label>
+        <input type="number" id="patient-age" value="30" required>
+      </div>
+      
+      <div class="form-group">
+        <label>Phone *</label>
+        <input type="tel" id="patient-phone" value="+265 999 123 456" required>
+      </div>
+      
+      <div class="form-group">
+        <label>ID Number *</label>
+        <input type="text" id="patient-id" value="TEST123" required>
+      </div>
+      
+      <div class="form-group">
+        <label>Department *</label>
+        <select id="department" required>
+          <option value="opd">OPD</option>
+          <option value="maternity">Maternity</option>
+          <option value="emergency">Emergency</option>
+          <option value="pediatrics">Pediatrics</option>
+        </select>
+      </div>
+      
+      <button type="submit">📝 Create Token</button>
+    </form>
+    
+    <div id="result"></div>
+  </div>
+
+  <div class="card">
+    <h2>Console Log</h2>
+    <pre id="console-log">Waiting for form submission...</pre>
+  </div>
+
+  <script>
+    // INLINE createQueueToken function (copied from queue.js)
+    const API_BASE_URL = 'http://localhost/queue%20system/php/api';
+    
+    const logEl = document.getElementById('console-log');
+    
+    function log(msg) {
+      const timestamp = new Date().toLocaleTimeString();
+      logEl.textContent += `[${timestamp}] ${msg}\n`;
+      console.log(msg);
+    }
+
+    async function createQueueToken(patientData) {
+      try {
+        log('Creating queue token...');
+        log('Data: ' + JSON.stringify(patientData, null, 2));
+        
+        const response = await fetch(`${API_BASE_URL}/queue.php?action=create`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          credentials: 'include',
+          body: JSON.stringify(patientData)
+        });
+
+        log('Response status: ' + response.status);
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          log('Error response: ' + errorText);
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        log('Response data: ' + JSON.stringify(data, null, 2));
+
+        return data;
+      } catch (error) {
+        log('ERROR: ' + error.message);
+        console.error('Create token error:', error);
+        return { success: false, message: error.message };
+      }
+    }
+
+    // Form handler
+    document.getElementById('test-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      logEl.textContent = ''; // Clear log
+      log('=== FORM SUBMITTED ===');
+      
+      const resultDiv = document.getElementById('result');
+      const submitBtn = e.target.querySelector('button');
+      
+      submitBtn.disabled = true;
+      submitBtn.textContent = '⏳ Creating...';
+      
+      const patientData = {
+        patient_name: document.getElementById('patient-name').value,
+        patient_age: parseInt(document.getElementById('patient-age').value),
+        patient_phone: document.getElementById('patient-phone').value,
+        patient_id_number: document.getElementById('patient-id').value,
+        patient_address: 'Test Address',
+        service_type: 'Test Service',
+        department: document.getElementById('department').value,
+        priority_type: 'no'
+      };
+      
+      try {
+        const result = await createQueueToken(patientData);
+        
+        if (result && result.success) {
+          log('✓ SUCCESS!');
+          resultDiv.innerHTML = `
+            <div class="result success">
+              <h3>✓ Token Created Successfully!</h3>
+              <p><strong>Token Number:</strong> ${result.token.token_number}</p>
+              <p><strong>Queue Position:</strong> ${result.token.queue_position}</p>
+              <p><strong>Department:</strong> ${result.token.department_name}</p>
+            </div>
+          `;
+        } else {
+          log('✗ FAILED: ' + result.message);
+          resultDiv.innerHTML = `
+            <div class="result error">
+              <h3>✗ Failed to Create Token</h3>
+              <p>${result.message}</p>
+            </div>
+          `;
+        }
+      } catch (error) {
+        log('✗ EXCEPTION: ' + error.message);
+        resultDiv.innerHTML = `
+          <div class="result error">
+            <h3>✗ Error Occurred</h3>
+            <p>${error.message}</p>
+          </div>
+        `;
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = '📝 Create Token';
+      }
+    });
+
+    log('Page loaded and ready');
+    log('createQueueToken function: ' + typeof createQueueToken);
+  </script>
+</body>
+</html>

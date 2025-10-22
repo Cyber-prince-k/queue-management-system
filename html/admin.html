@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Portal - QECH Queue System</title>
+  <link rel="stylesheet" href="../css/style.css" />
+</head>
+<body>
+  <header>
+    <div class="container">
+      <div class="logo-container">
+        <div>
+          <img src="https://via.placeholder.com/60x60/2c7fb8/ffffff?text=QECH" alt="QECH Logo" class="logo" />
+          <div>
+            <h1 data-i18n="hospital_name">Queen Elizabeth Central Hospital</h1>
+            <h2 data-i18n="system_name">Digital Queue Management System</h2>
+          </div>
+        </div>
+      </div>
+      <nav aria-label="Primary">
+        <ul>
+          <li><a class="btn btn-secondary" href="../index.html" data-i18n="nav_home">Home</a></li>
+          <li><a class="btn btn-secondary" href="patient.html" data-i18n="nav_patient">Patient</a></li>
+          <li><a class="btn btn-secondary" href="staff.html" data-i18n="nav_staff">Staff</a></li>
+          <li><a class="btn btn-secondary" href="admin.html" data-i18n="nav_admin">Admin</a></li>
+          <li><a class="btn btn-secondary" href="queues.html" data-i18n="nav_queues">Queues</a></li>
+          <li><a class="btn btn-primary" href="display.html" data-i18n="nav_display">Public Display</a></li>
+          <li id="user-info" style="display: flex; align-items: center; gap: 0.5rem;"></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <section id="admin-section" class="card">
+      <div class="section-header">
+        <h2 data-i18n="admin_access">Admin Access</h2>
+      </div>
+
+      <div class="admin-dashboard">
+        <div class="admin-card">
+          <h3>Queue Statistics</h3>
+          <div id="queue-stats">
+            <p>Total Patients Today: <span id="total-patients">0</span></p>
+            <p>Average Wait Time: <span id="avg-wait-time">0 min</span></p>
+            <p>Currently Waiting: <span id="currently-waiting">0</span></p>
+          </div>
+        </div>
+
+        <div class="admin-card">
+          <h3>Reports</h3>
+          <div class="report-options">
+            <button id="daily-report-btn" class="btn btn-primary">Generate Daily Report</button>
+            <button id="weekly-report-btn" class="btn btn-primary">Generate Weekly Report</button>
+          </div>
+        </div>
+
+        <div class="admin-card">
+          <h3>System Management</h3>
+          <div class="system-controls">
+            <button id="reset-queues-btn" class="btn btn-danger">Reset All Queues</button>
+            <button id="backup-data-btn" class="btn btn-secondary">Backup Data</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="report-output" class="report-output hidden" aria-live="polite"></div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-section">
+          <h3>About QECH</h3>
+          <p>Queen Elizabeth Central Hospital is Malawi's largest referral hospital, providing quality healthcare services to the nation.</p>
+        </div>
+        <div class="footer-section">
+          <h3>Quick Links</h3>
+          <ul>
+            <li><a href="patient.html">Patient Portal</a></li>
+            <li><a href="staff.html">Staff Portal</a></li>
+            <li><a href="admin.html">Admin Portal</a></li>
+            <li><a href="display.html">Public Display</a></li>
+          </ul>
+        </div>
+        <div class="footer-section">
+          <h3>Contact</h3>
+          <p>Queen Elizabeth Central Hospital<br>
+          Blantyre, Malawi<br>
+          Phone: +265 1 871 111</p>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p data-i18n="footer_line1">&copy; 2023 Queen Elizabeth Central Hospital - Digital Queue Management System</p>
+        
+      </div>
+    </div>
+  </footer>
+
+  <script src="../js/auth.js"></script>
+  <script src="../js/style.js"></script>
+  <script>
+    // Require admin role only
+    requireRole(['admin']);
+  </script>
+</body>
+</html>

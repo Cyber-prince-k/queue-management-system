@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Debug Patient Form - QECH</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 900px;
+      margin: 2rem auto;
+      padding: 1rem;
+      background: #f5f5f5;
+    }
+    .container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+    .panel {
+      background: white;
+      padding: 1.5rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    h1, h2 {
+      color: #2563eb;
+      margin-top: 0;
+    }
+    .form-group {
+      margin-bottom: 1rem;
+    }
+    label {
+      display: block;
+      margin-bottom: 0.25rem;
+      font-weight: bold;
+      color: #374151;
+    }
+    input, select, textarea {
+      width: 100%;
+      padding: 0.5rem;
+      border: 1px solid #d1d5db;
+      border-radius: 4px;
+      font-size: 1rem;
+    }
+    button {
+      background: #2563eb;
+      color: white;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 1rem;
+      width: 100%;
+    }
+    button:hover {
+      background: #1d4ed8;
+    }
+    button:disabled {
+      background: #9ca3af;
+      cursor: not-allowed;
+    }
+    .log {
+      background: #1e293b;
+      color: #10b981;
+      padding: 1rem;
+      border-radius: 4px;
+      font-family: monospace;
+      font-size: 0.85rem;
+      max-height: 500px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+    .log .error {
+      color: #ef4444;
+    }
+    .log .success {
+      color: #10b981;
+    }
+    .log .info {
+      color: #3b82f6;
+    }
+    .log .warning {
+      color: #f59e0b;
+    }
+  </style>
+</head>
+<body>
+  <h1>🔍 Patient Form Debugger</h1>
+  
+  <div class="container">
+    <div class="panel">
+      <h2>Patient Registration Form</h2>
+      <form id="test-form">
+        <div class="form-group">
+          <label>Full Name *</label>
+          <input type="text" id="patient-name" value="Test Patient" required>
+        </div>
+        
+        <div class="form-group">
+          <label>Age *</label>
+          <input type="number" id="patient-age" value="30" required>
+        </div>
+        
+        <div class="form-group">
+          <label>Phone Number *</label>
+          <input type="tel" id="patient-phone" value="+265 999 123 456" required>
+        </div>
+        
+        <div class="form-group">
+          <label>ID Number *</label>
+          <input type="text" id="patient-id" value="TEST123" required>
+        </div>
+        
+        <div class="form-group">
+          <label>Address</label>
+          <textarea id="patient-address" rows="2">Test Address</textarea>
+        </div>
+        
+        <div class="form-group">
+          <label>Department *</label>
+          <select id="patient-department" required>
+            <option value="">-- Select --</option>
+            <option value="opd" selected>OPD</option>
+            <option value="maternity">Maternity</option>
+            <option value="emergency">Emergency</option>
+            <option value="pediatrics">Pediatrics</option>
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <label>Service Type</label>
+          <input type="text" id="service-type" value="Test Consultation">
+        </div>
+        
+        <div class="form-group">
+          <label>Priority Case</label>
+          <select id="priority-case">
+            <option value="no">No Priority</option>
+            <option value="emergency">Emergency</option>
+            <option value="elderly">Elderly (65+)</option>
+            <option value="pregnant">Pregnant</option>
+            <option value="disability">Disability</option>
+          </select>
+        </div>
+        
+        <button type="submit" id="submit-btn">📝 Submit & Test</button>
+      </form>
+      
+      <div id="result" style="margin-top: 1rem;"></div>
+    </div>
+    
+    <div class="panel">
+      <h2>Console Log</h2>
+      <div id="console-log" class="log">Waiting for form submission...</div>
+      <button onclick="clearLog()" style="margin-top: 0.5rem; background: #6b7280;">Clear Log</button>
+    </div>
+  </div>
+
+  <script>
+    const API_BASE_URL = 'http://localhost/queue%20system/php/api';
+    const logEl = document.getElementById('console-log');
+    
+    function log(message, type = 'info') {
+      const timestamp = new Date().toLocaleTimeString();
+      const line = `[${timestamp}] ${message}\n`;
+      const span = document.createElement('span');
+      span.className = type;
+      span.textContent = line;
+      logEl.appendChild(span);
+      logEl.scrollTop = logEl.scrollHeight;
+      console.log(message);
+    }
+    
+    function clearLog() {
+      logEl.innerHTML = 'Log cleared.\n';
+    }
+    
+    document.getElementById('test-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      clearLog();
+      log('=== FORM SUBMISSION STARTED ===', 'info');
+      
+      const patientData = {
+        patient_name: document.getElementById('patient-name').value,
+        patient_age: parseInt(document.getElementById('patient-age').value),
+        patient_phone: document.getElementById('patient-phone').value,
+        patient_id_number: document.getElementById('patient-id').value,
+        patient_address: document.getElementById('patient-address').value,
+        service_type: document.getElementById('service-type').value,
+        department: document.getElementById('patient-department').value,
+        priority_type: document.getElementById('priority-case').value
+      };
+      
+      log('Patient Data:', 'info');
+      log(JSON.stringify(patientData, null, 2), 'info');
+      
+      const submitBtn = document.getElementById('submit-btn');
+      submitBtn.disabled = true;
+      submitBtn.textContent = '⏳ Creating Token...';
+      
+      try {
+        log('Sending POST request to: ' + API_BASE_URL + '/queue.php?action=create', 'info');
+        
+        const response = await fetch(`${API_BASE_URL}/queue.php?action=create`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          credentials: 'include',
+          body: JSON.stringify(patientData)
+        });
+        
+        log('Response Status: ' + response.status + ' ' + response.statusText, response.ok ? 'success' : 'error');
+        
+        const responseText = await response.text();
+        log('Raw Response:', 'info');
+        log(responseText, 'info');
+        
+        let data;
+        try {
+          data = JSON.parse(responseText);
+          log('Parsed JSON:', 'success');
+          log(JSON.stringify(data, null, 2), 'success');
+        } catch (parseError) {
+          log('JSON Parse Error: ' + parseError.message, 'error');
+          throw new Error('Invalid JSON response from server');
+        }
+        
+        if (data.success) {
+          log('✓ TOKEN CREATED SUCCESSFULLY!', 'success');
+          log('Token Number: ' + data.token.token_number, 'success');
+          log('Queue Position: ' + data.token.queue_position, 'success');
+          
+          document.getElementById('result').innerHTML = `
+            <div style="background: #d1fae5; padding: 1rem; border-radius: 6px; border-left: 4px solid #10b981; margin-top: 1rem;">
+              <h3 style="margin: 0 0 0.5rem 0; color: #065f46;">✓ Success!</h3>
+              <p style="margin: 0;"><strong>Token:</strong> ${data.token.token_number}</p>
+              <p style="margin: 0;"><strong>Position:</strong> ${data.token.queue_position}</p>
+            </div>
+          `;
+        } else {
+          log('✗ Token creation failed: ' + data.message, 'error');
+          document.getElementById('result').innerHTML = `
+            <div style="background: #fee2e2; padding: 1rem; border-radius: 6px; border-left: 4px solid #ef4444; margin-top: 1rem;">
+              <h3 style="margin: 0 0 0.5rem 0; color: #991b1b;">✗ Failed</h3>
+              <p style="margin: 0;">${data.message}</p>
+            </div>
+          `;
+        }
+        
+      } catch (error) {
+        log('✗ EXCEPTION CAUGHT:', 'error');
+        log('Error Name: ' + error.name, 'error');
+        log('Error Message: ' + error.message, 'error');
+        log('Error Stack: ' + error.stack, 'error');
+        
+        document.getElementById('result').innerHTML = `
+          <div style="background: #fee2e2; padding: 1rem; border-radius: 6px; border-left: 4px solid #ef4444; margin-top: 1rem;">
+            <h3 style="margin: 0 0 0.5rem 0; color: #991b1b;">✗ Error</h3>
+            <p style="margin: 0;">${error.message}</p>
+          </div>
+        `;
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = '📝 Submit & Test';
+        log('=== FORM SUBMISSION COMPLETED ===', 'info');
+      }
+    });
+    
+    // Test connection on load
+    window.addEventListener('load', async () => {
+      log('Testing server connection...', 'info');
+      try {
+        const response = await fetch(`${API_BASE_URL}/queue.php?action=status`);
+        if (response.ok) {
+          log('✓ Server is online and responding', 'success');
+        } else {
+          log('✗ Server returned error: ' + response.status, 'error');
+        }
+      } catch (error) {
+        log('✗ Cannot connect to server: ' + error.message, 'error');
+        log('Make sure XAMPP is running!', 'warning');
+      }
+    });
+  </script>
+</body>
+</html>

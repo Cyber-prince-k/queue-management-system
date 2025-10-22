@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>API Test - Queue System</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 2rem auto;
+      padding: 1rem;
+      background: #f5f5f5;
+    }
+    .test-section {
+      background: white;
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .test-section h2 {
+      margin-top: 0;
+      color: #2563eb;
+    }
+    button {
+      background: #2563eb;
+      color: white;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 1rem;
+      margin-right: 0.5rem;
+    }
+    button:hover {
+      background: #1d4ed8;
+    }
+    .result {
+      margin-top: 1rem;
+      padding: 1rem;
+      background: #f8fafc;
+      border-left: 4px solid #2563eb;
+      border-radius: 4px;
+      white-space: pre-wrap;
+      font-family: monospace;
+      font-size: 0.9rem;
+    }
+    .error {
+      border-left-color: #ef4444;
+      background: #fee;
+    }
+    .success {
+      border-left-color: #10b981;
+      background: #f0fdf4;
+    }
+    .status {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      border-radius: 4px;
+      font-size: 0.85rem;
+      font-weight: bold;
+      margin-left: 0.5rem;
+    }
+    .status.online {
+      background: #d1fae5;
+      color: #065f46;
+    }
+    .status.offline {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+  </style>
+</head>
+<body>
+  <h1>🔧 Queue System API Test</h1>
+  
+  <div class="test-section">
+    <h2>1. Server Status</h2>
+    <p>Check if XAMPP and the API are running:</p>
+    <button onclick="testServerConnection()">Test Connection</button>
+    <div id="server-status"></div>
+  </div>
+
+  <div class="test-section">
+    <h2>2. Database Connection</h2>
+    <p>Test if the database is accessible:</p>
+    <button onclick="testDatabase()">Test Database</button>
+    <div id="db-status"></div>
+  </div>
+
+  <div class="test-section">
+    <h2>3. Create Test Token</h2>
+    <p>Try creating a test queue token:</p>
+    <button onclick="createTestToken()">Create Token</button>
+    <div id="token-result"></div>
+  </div>
+
+  <div class="test-section">
+    <h2>4. View All Tokens</h2>
+    <p>Get all active queue tokens:</p>
+    <button onclick="getAllTokens()">Get Tokens</button>
+    <div id="tokens-list"></div>
+  </div>
+
+  <script>
+    const API_BASE_URL = 'http://localhost/queue%20system/php/api';
+
+    async function testServerConnection() {
+      const resultDiv = document.getElementById('server-status');
+      resultDiv.innerHTML = '<p>Testing connection...</p>';
+      
+      try {
+        const response = await fetch(`${API_BASE_URL}/queue.php?action=status`, {
+          method: 'GET',
+          credentials: 'include'
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          resultDiv.innerHTML = `
+            <div class="result success">
+              ✓ Server is online and responding!
+              <span class="status online">ONLINE</span>
+              <br><br>
+              Response: ${JSON.stringify(data, null, 2)}
+            </div>
+          `;
+        } else {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+      } catch (error) {
+        resultDiv.innerHTML = `
+          <div class="result error">
+            ✗ Server connection failed
+            <span class="status offline">OFFLINE</span>
+            <br><br>
+            Error: ${error.message}
+            <br><br>
+            <strong>Troubleshooting:</strong>
+            <br>1. Make sure XAMPP is running (Apache and MySQL)
+            <br>2. Check if the URL is correct: ${API_BASE_URL}
+            <br>3. Verify the PHP files exist in the correct location
+          </div>
+        `;
+      }
+    }
+
+    async function testDatabase() {
+      const resultDiv = document.getElementById('db-status');
+      resultDiv.innerHTML = '<p>Testing database...</p>';
+      
+      try {
+        const response = await fetch(`${API_BASE_URL}/queue.php?action=status`, {
+          method: 'GET',
+          credentials: 'include'
+        });
+        
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`);
+        }
+        
+        const data = await response.json();
+        
+        if (data.success) {
+          resultDiv.innerHTML = `
+            <div class="result success">
+              ✓ Database connection successful!
+              <br><br>
+              Active tokens: ${data.tokens ? data.tokens.length : 0}
+            </div>
+          `;
+        } else {
+          throw new Error(data.message || 'Database query failed');
+        }
+      } catch (error) {
+        resultDiv.innerHTML = `
+          <div class="result error">
+            ✗ Database connection failed
+            <br><br>
+            Error: ${error.message}
+            <br><br>
+            <strong>Troubleshooting:</strong>
+            <br>1. Check if MySQL is running in XAMPP
+            <br>2. Verify database 'qech_queue_system' exists
+            <br>3. Check config.php for correct credentials
+          </div>
+        `;
+      }
+    }
+
+    async function createTestToken() {
+      const resultDiv = document.getElementById('token-result');
+      resultDiv.innerHTML = '<p>Creating test token...</p>';
+      
+      const testData = {
+        patient_name: 'Test Patient',
+        patient_age: 30,
+        patient_phone: '+265 999 123 456',
+        patient_id_number: 'TEST123',
+        patient_address: 'Test Address',
+        service_type: 'Test Consultation',
+        department: 'opd',
+        priority_type: 'no'
+      };
+      
+      try {
+        console.log('Sending request to:', `${API_BASE_URL}/queue.php?action=create`);
+        console.log('Data:', testData);
+        
+        const response = await fetch(`${API_BASE_URL}/queue.php?action=create`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          credentials: 'include',
+          body: JSON.stringify(testData)
+        });
+        
+        console.log('Response status:', response.status);
+        
+        const responseText = await response.text();
+        console.log('Response text:', responseText);
+        
+        let data;
+        try {
+          data = JSON.parse(responseText);
+        } catch (e) {
+          throw new Error(`Invalid JSON response: ${responseText}`);
+        }
+        
+        if (data.success) {
+          resultDiv.innerHTML = `
+            <div class="result success">
+              ✓ Token created successfully!
+              <br><br>
+              <strong>Token Number:</strong> ${data.token.token_number}
+              <br><strong>Queue Position:</strong> ${data.token.queue_position}
+              <br><br>
+              Full response: ${JSON.stringify(data, null, 2)}
+            </div>
+          `;
+        } else {
+          throw new Error(data.message || 'Token creation failed');
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        resultDiv.innerHTML = `
+          <div class="result error">
+            ✗ Failed to create token
+            <br><br>
+            Error: ${error.message}
+            <br><br>
+            Check the browser console (F12) for more details.
+          </div>
+        `;
+      }
+    }
+
+    async function getAllTokens() {
+      const resultDiv = document.getElementById('tokens-list');
+      resultDiv.innerHTML = '<p>Loading tokens...</p>';
+      
+      try {
+        const response = await fetch(`${API_BASE_URL}/queue.php?action=status`, {
+          method: 'GET',
+          credentials: 'include'
+        });
+        
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`);
+        }
+        
+        const data = await response.json();
+        
+        if (data.success && data.tokens) {
+          if (data.tokens.length === 0) {
+            resultDiv.innerHTML = `
+              <div class="result">
+                No active tokens in the queue.
+              </div>
+            `;
+          } else {
+            resultDiv.innerHTML = `
+              <div class="result success">
+                Found ${data.tokens.length} active token(s):
+                <br><br>
+                ${JSON.stringify(data.tokens, null, 2)}
+              </div>
+            `;
+          }
+        } else {
+          throw new Error(data.message || 'Failed to get tokens');
+        }
+      } catch (error) {
+        resultDiv.innerHTML = `
+          <div class="result error">
+            ✗ Failed to get tokens
+            <br><br>
+            Error: ${error.message}
+          </div>
+        `;
+      }
+    }
+
+    // Auto-test on load
+    window.addEventListener('load', () => {
+      console.log('API Base URL:', API_BASE_URL);
+      testServerConnection();
+    });
+  </script>
+</body>
+</html>

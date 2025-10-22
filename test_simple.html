@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simple Test - Queue Function</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 600px;
+      margin: 2rem auto;
+      padding: 2rem;
+      background: #f5f5f5;
+    }
+    .card {
+      background: white;
+      padding: 2rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .success { color: #10b981; font-weight: bold; }
+    .error { color: #ef4444; font-weight: bold; }
+    pre {
+      background: #1e293b;
+      color: #10b981;
+      padding: 1rem;
+      border-radius: 4px;
+      overflow-x: auto;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>🔍 Simple Function Test</h1>
+    <p>This page tests if <code>createQueueToken</code> function loads correctly.</p>
+    
+    <h2>Result:</h2>
+    <div id="result">Testing...</div>
+    
+    <h2>Console Output:</h2>
+    <pre id="console"></pre>
+  </div>
+
+  <!-- Load queue.js -->
+  <script src="js/queue.js"></script>
+  
+  <script>
+    const consoleEl = document.getElementById('console');
+    const resultEl = document.getElementById('result');
+    
+    function log(msg) {
+      consoleEl.textContent += msg + '\n';
+      console.log(msg);
+    }
+
+    window.addEventListener('load', function() {
+      log('Page loaded');
+      log('Checking createQueueToken...');
+      
+      if (typeof createQueueToken === 'function') {
+        log('✓ SUCCESS: createQueueToken is defined!');
+        log('✓ Type: ' + typeof createQueueToken);
+        resultEl.innerHTML = '<p class="success">✓ createQueueToken function is available!</p><p>The function exists and can be called.</p>';
+      } else {
+        log('✗ FAILED: createQueueToken is NOT defined');
+        log('✗ Type: ' + typeof createQueueToken);
+        resultEl.innerHTML = '<p class="error">✗ createQueueToken function is NOT available!</p><p>This means queue.js did not load properly.</p>';
+      }
+      
+      // List all available functions
+      log('\nAvailable queue functions:');
+      const queueFunctions = [
+        'createQueueToken',
+        'getQueueStatus', 
+        'callNextPatient',
+        'refreshQueueDisplay',
+        'pauseQueue',
+        'resumeQueue'
+      ];
+      
+      queueFunctions.forEach(func => {
+        const exists = typeof window[func] === 'function';
+        log((exists ? '✓' : '✗') + ' ' + func);
+      });
+    });
+  </script>
+</body>
+</html>

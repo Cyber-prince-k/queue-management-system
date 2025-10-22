@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+  <title>Patient Portal - QECH Queue System [v20251022-1216]</title>
+  <link rel="stylesheet" href="/queue%20system/css/style.css" />
+</head>
+<body>
+  <header>
+    <div class="container">
+      <div class="logo-container">
+        <div>
+          <img src="https://via.placeholder.com/60x60/2c7fb8/ffffff?text=QECH" alt="QECH Logo" class="logo" />
+          <div>
+            <h1 data-i18n="hospital_name">Queen Elizabeth Central Hospital</h1>
+            <h2 data-i18n="system_name">Digital Queue Management System</h2>
+          </div>
+        </div>
+      </div>
+      <nav aria-label="Primary">
+        <ul>
+          <li><a class="btn btn-secondary" href="../index.html" data-i18n="nav_home">Home</a></li>
+          <li><a class="btn btn-secondary" href="patient.html" data-i18n="nav_patient">Patient</a></li>
+          <li><a class="btn btn-secondary" href="queues.html" data-i18n="nav_queues">Queues</a></li>
+          <li><a class="btn btn-primary" href="display.html" data-i18n="nav_display">Public Display</a></li>
+          <li id="user-info" style="display: flex; align-items: center; gap: 0.5rem;"></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <section id="patient-section" class="card">
+      <div class="section-header">
+        <h2 data-i18n="patient_access">Patient Access</h2>
+      </div>
+
+      <div class="tabs" role="tablist" aria-label="Patient Actions">
+        <button class="tab-btn active" data-tab="register-tab" role="tab" aria-selected="true" aria-controls="register-tab">Register</button>
+        <button class="tab-btn" data-tab="queue-status-tab" role="tab" aria-selected="false" aria-controls="queue-status-tab">Queue Status</button>
+      </div>
+
+      <section id="register-tab" class="tab-content active" role="tabpanel" aria-labelledby="Register">
+        <div class="info-banner" style="background: #dbeafe; border-left: 4px solid #2563eb; padding: 1rem; margin-bottom: 1.5rem; border-radius: 8px;">
+          <h3 style="margin-top: 0; color: #1e40af; font-size: 1.1rem;">📋 Queue Registration</h3>
+          <p style="margin: 0.5rem 0; color: #1e3a8a; line-height: 1.6;">
+            Please fill in your details below and select the department you wish to visit. 
+            Once submitted, you will receive a queue token number and be placed in line for service at your selected department.
+            Your request will appear on the staff dashboard for processing.
+          </p>
+        </div>
+
+        <h3>Patient Registration & Queue Request</h3>
+        <form id="patient-registration-form">
+          <div class="form-group">
+            <label for="patient-name">Full Name <span style="color: #ef4444;">*</span></label>
+            <input type="text" id="patient-name" name="patient-name" placeholder="Enter your full name" required />
+          </div>
+          
+          <div class="form-group">
+            <label for="patient-age">Age <span style="color: #ef4444;">*</span></label>
+            <input type="number" id="patient-age" name="patient-age" min="0" max="150" placeholder="Enter your age" required />
+          </div>
+          
+          <div class="form-group">
+            <label for="patient-phone">Phone Number <span style="color: #ef4444;">*</span></label>
+            <input type="tel" id="patient-phone" name="patient-phone" placeholder="e.g., +265 999 123 456" required />
+          </div>
+          
+          <div class="form-group">
+            <label for="patient-id">ID Number <span style="color: #ef4444;">*</span></label>
+            <input type="text" id="patient-id" name="patient-id" placeholder="National ID or Passport Number" required />
+          </div>
+          
+          <div class="form-group">
+            <label for="patient-address">Address</label>
+            <textarea id="patient-address" name="patient-address" rows="2" placeholder="Your residential address (optional)"></textarea>
+          </div>
+          
+          <div class="form-group">
+            <label for="patient-department">Department to Visit <span style="color: #ef4444;">*</span></label>
+            <select id="patient-department" name="patient-department" required>
+              <option value="">-- Select Department --</option>
+              <option value="opd">Outpatient Department (OPD)</option>
+              <option value="maternity">Maternity</option>
+              <option value="emergency">Emergency</option>
+              <option value="pediatrics">Pediatrics</option>
+            </select>
+          </div>
+          
+          <div class="form-group">
+            <label for="service-type">Service Required</label>
+            <input type="text" id="service-type" name="service-type" placeholder="e.g., Consultation, Check-up, Follow-up" />
+          </div>
+          
+          <div class="form-group">
+            <label for="priority-case">Priority Case</label>
+            <select id="priority-case" name="priority-case">
+              <option value="no">No Priority</option>
+              <option value="emergency">Emergency</option>
+              <option value="elderly">Elderly (65+)</option>
+              <option value="pregnant">Pregnant</option>
+              <option value="disability">Disability</option>
+            </select>
+            <small style="color: #64748b; display: block; margin-top: 0.25rem;">Select if you qualify for priority service</small>
+          </div>
+          
+          <div style="background: #fef3c7; border-left: 4px solid #f59e0b; padding: 1rem; margin: 1rem 0; border-radius: 8px;">
+            <p style="margin: 0; color: #92400e; font-size: 0.9rem;">
+              <strong>⚠️ Important:</strong> After submitting, you will receive a token number. Please keep this number safe as you will need it to check your queue position.
+            </p>
+          </div>
+          
+          <button type="submit" class="btn btn-primary" style="width: 100%; padding: 0.75rem; font-size: 1.1rem;">
+            📝 Submit & Join Queue
+          </button>
+        </form>
+        
+        <div id="token-display" style="margin-top: 1.5rem;"></div>
+      </section>
+
+      <section id="queue-status-tab" class="tab-content" role="tabpanel" aria-labelledby="Queue Status">
+        <h3>Check Queue Status</h3>
+        <form id="queue-status-form">
+          <div class="form-group">
+            <label for="queue-token">Token Number</label>
+            <input type="text" id="queue-token" name="queue-token" required />
+          </div>
+          <button type="submit" class="btn btn-primary">Check Status</button>
+        </form>
+        <div id="queue-status-result" class="queue-display hidden" aria-live="polite"></div>
+      </section>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-section">
+          <h3>About QECH</h3>
+          <p>Queen Elizabeth Central Hospital is Malawi's largest referral hospital, providing quality healthcare services to the nation.</p>
+        </div>
+        <div class="footer-section">
+          <h3>Quick Links</h3>
+          <ul>
+            <li><a href="patient.html">Patient Portal</a></li>
+            <li><a href="staff.html">Staff Portal</a></li>
+            <li><a href="admin.html">Admin Portal</a></li>
+            <li><a href="display.html">Public Display</a></li>
+          </ul>
+        </div>
+        <div class="footer-section">
+          <h3>Contact</h3>
+          <p>Queen Elizabeth Central Hospital<br>
+          Blantyre, Malawi<br>
+          Phone: +265 1 871 111</p>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2023 Queen Elizabeth Central Hospital - Digital Queue Management System</p>
+        
+      </div>
+    </div>
+  </footer>
+
+  <script src="/queue%20system/js/auth.js?v=20251022095900" onerror="console.error('Failed to load auth.js')"></script>
+  <script src="/queue%20system/js/style.js?v=20251022095900" onerror="console.error('Failed to load style.js')"></script>
+  
+  <!-- Print styles for token -->
+  <style>
+    @media print {
+        body * {
+            visibility: hidden;
+        }
+        #token-display, #token-display * {
+            visibility: visible;
+        }
+        #token-display {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+        }
+        #token-display button {
+            display: none !important;
+        }
+    }
+  </style>
+  
+  <!-- ALL SCRIPTS IN ONE BLOCK -->
+  <script>
+    // Catch any uncaught errors
+    window.addEventListener('error', function(e) {
+      console.error('❌ UNCAUGHT ERROR:', e.error);
+      console.error('Message:', e.message);
+      console.error('File:', e.filename);
+      console.error('Line:', e.lineno);
+    });
+    
+    console.log('=== PATIENT.HTML SCRIPT STARTING ===');
+    
+    // Define API_BASE_URL only if not already defined
+    if (typeof API_BASE_URL === 'undefined') {
+      var API_BASE_URL = 'http://localhost/queue%20system/php/api';
+    }
+    console.log('✓ API_BASE_URL:', API_BASE_URL);
+    
+    // Create new queue token (Patient Registration)
+    async function createQueueToken(patientData) {
+        try {
+            console.log('createQueueToken called with:', patientData);
+            
+            const response = await fetch(`${API_BASE_URL}/queue.php?action=create`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                credentials: 'include',
+                body: JSON.stringify(patientData)
+            });
+
+            console.log('Response status:', response.status);
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error('Server response:', errorText);
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            console.log('Response data:', data);
+            console.log('Token data:', data.token);
+
+            if (data.success && data.token) {
+                console.log('✓ Token created, calling displayTokenDetails...');
+                // Display token details
+                displayTokenDetails(data.token);
+                console.log('✓ displayTokenDetails called');
+            } else {
+                console.error('❌ Token creation failed or no token in response');
+                console.error('Success:', data.success);
+                console.error('Token:', data.token);
+            }
+
+            return data;
+        } catch (error) {
+            console.error('Create token error:', error);
+            return { success: false, message: error.message };
+        }
+    }
+    
+    // Display token details
+    function displayTokenDetails(token) {
+        console.log('displayTokenDetails called with:', token);
+        const tokenDisplay = document.getElementById('token-display');
+        if (!tokenDisplay) {
+            console.error('❌ token-display element not found!');
+            return;
+        }
+        console.log('✓ token-display element found');
+        
+        tokenDisplay.innerHTML = `
+            <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 2rem; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); text-align: center; color: white;">
+                <div style="font-size: 3rem; margin-bottom: 1rem;">🎫</div>
+                <h3 style="margin: 0 0 1rem 0; font-size: 1.5rem; font-weight: bold;">Token Created Successfully!</h3>
+                
+                <div style="background: rgba(255,255,255,0.95); padding: 1.5rem; border-radius: 12px; margin: 1rem 0; color: #1e293b;">
+                    <p style="margin: 0 0 0.5rem 0; font-size: 0.9rem; color: #64748b; text-transform: uppercase; letter-spacing: 1px;">Your Token Number</p>
+                    <p style="font-size: 2.5rem; font-weight: bold; margin: 0; color: #2563eb; font-family: monospace; letter-spacing: 2px;">
+                        ${token.token_number}
+                    </p>
+                </div>
+                
+                <div style="background: rgba(255,255,255,0.2); padding: 1rem; border-radius: 8px; margin: 1rem 0;">
+                    <p style="margin: 0; font-size: 1.1rem;">
+                        <strong>Queue Position:</strong> <span style="font-size: 1.3rem; font-weight: bold;">#${token.queue_position}</span>
+                    </p>
+                </div>
+                
+                <div style="background: rgba(255,255,255,0.15); padding: 1rem; border-radius: 8px; margin-top: 1rem; border-left: 4px solid #fbbf24;">
+                    <p style="margin: 0; font-size: 0.95rem; line-height: 1.6;">
+                        ⚠️ <strong>Important:</strong> Please save this token number. You will need it to check your queue status.
+                    </p>
+                </div>
+                
+                <div style="margin-top: 1.5rem; display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+                    <button onclick="window.print()" type="button" class="btn" style="background: white; color: #667eea; padding: 0.75rem 1.5rem; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 1rem;">
+                        🖨️ Print Token
+                    </button>
+                    <button onclick="copyTokenNumber('${token.token_number}')" type="button" class="btn" style="background: rgba(255,255,255,0.2); color: white; padding: 0.75rem 1.5rem; border: 2px solid white; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 1rem;">
+                        📋 Copy Number
+                    </button>
+                </div>
+            </div>
+        `;
+        tokenDisplay.classList.remove('hidden');
+        console.log('✓ Token display updated and made visible');
+        
+        // Scroll to token display
+        setTimeout(() => {
+            tokenDisplay.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            console.log('✓ Scrolled to token display');
+        }, 100);
+    }
+    
+    // Copy token number to clipboard
+    function copyTokenNumber(tokenNumber) {
+        console.log('Copying token:', tokenNumber);
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(tokenNumber).then(() => {
+                alert('✓ Token number copied to clipboard: ' + tokenNumber);
+            }).catch(err => {
+                console.error('Failed to copy:', err);
+                fallbackCopy(tokenNumber);
+            });
+        } else {
+            fallbackCopy(tokenNumber);
+        }
+    }
+    
+    // Fallback copy method
+    function fallbackCopy(text) {
+        const textArea = document.createElement('textarea');
+        textArea.value = text;
+        textArea.style.position = 'fixed';
+        textArea.style.left = '-999999px';
+        document.body.appendChild(textArea);
+        textArea.select();
+        try {
+            document.execCommand('copy');
+            alert('✓ Token number copied: ' + text);
+        } catch (err) {
+            alert('Could not copy token number. Please write it down: ' + text);
+        }
+        document.body.removeChild(textArea);
+    }
+    
+    console.log('✓ Queue functions defined');
+    
+    // ===== FORM HANDLERS =====
+    // Wait for DOM to be ready
+    window.addEventListener('load', function() {
+      console.log('=== PAGE LOAD DEBUG ===');
+      console.log('createQueueToken:', typeof createQueueToken);
+      console.log('showToast:', typeof showToast);
+      console.log('requireRole:', typeof requireRole);
+      
+      // Patient registration form handler - ALWAYS attach this
+      const form = document.getElementById('patient-registration-form');
+      if (!form) {
+        console.error('❌ Form not found!');
+        return;
+      }
+      
+      console.log('✓ Form found, attaching handler...');
+      
+      form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      console.log('=== FORM SUBMITTED ===');
+      
+      // Check if createQueueToken exists NOW (at submit time)
+      if (typeof createQueueToken !== 'function') {
+        console.error('❌ createQueueToken not available at submit time!');
+        console.error('Skipping check - function should be defined inline above');
+        // Don't return - the function is defined inline, so it should exist
+      }
+      
+      console.log('Form submitted - starting patient registration...');
+      
+      const patientData = {
+        patient_name: document.getElementById('patient-name').value,
+        patient_age: parseInt(document.getElementById('patient-age').value),
+        patient_phone: document.getElementById('patient-phone').value,
+        patient_id_number: document.getElementById('patient-id').value,
+        patient_address: document.getElementById('patient-address').value,
+        service_type: document.getElementById('service-type').value,
+        department: document.getElementById('patient-department').value,
+        priority_type: document.getElementById('priority-case').value
+      };
+      
+      console.log('Patient data:', patientData);
+      
+      // Auto-set priority for elderly
+      if (patientData.patient_age >= 65 && patientData.priority_type === 'no') {
+        patientData.priority_type = 'elderly';
+        console.log('Auto-set priority to elderly');
+      }
+      
+      const submitBtn = e.target.querySelector('button[type="submit"]');
+      submitBtn.disabled = true;
+      submitBtn.textContent = '⏳ Creating Token...';
+      
+      try {
+        console.log('Calling createQueueToken...');
+        const result = await createQueueToken(patientData);
+        console.log('Result from createQueueToken:', result);
+        
+        if (result && result.success) {
+          console.log('Token created successfully:', result.token);
+          
+          // Show success message
+          if (typeof showToast === 'function') {
+            showToast('✓ Token created successfully!', 'success');
+          } else {
+            alert('✓ Token created successfully! Token: ' + result.token.token_number);
+          }
+          
+          // Clear form
+          e.target.reset();
+          
+          // Scroll to token display
+          const tokenDisplay = document.getElementById('token-display');
+          if (tokenDisplay) {
+            console.log('Scrolling to token display');
+            setTimeout(() => {
+              tokenDisplay.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }, 200);
+          } else {
+            console.error('Token display element not found!');
+          }
+        } else {
+          console.error('Token creation failed:', result);
+          const errorMsg = result?.message || 'Failed to create token. Please try again.';
+          if (typeof showToast === 'function') {
+            showToast(errorMsg, 'error');
+          } else {
+            alert(errorMsg);
+          }
+        }
+      } catch (error) {
+        console.error('Error submitting form:', error);
+        console.error('Error details:', {
+          message: error.message,
+          stack: error.stack,
+          name: error.name
+        });
+        const errorMsg = `An error occurred: ${error.message}. Please check the console for details.`;
+        if (typeof showToast === 'function') {
+          showToast(errorMsg, 'error');
+        } else {
+          alert(errorMsg);
+        }
+      } finally {
+        // Always re-enable button
+        console.log('Re-enabling submit button');
+        submitBtn.disabled = false;
+        submitBtn.textContent = '📝 Submit & Join Queue';
+      }
+    });
+
+    // Queue status check form handler
+    document.getElementById('queue-status-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const tokenNumber = document.getElementById('queue-token').value;
+      
+      if (!tokenNumber) {
+        showToast('Please enter a token number', 'error');
+        return;
+      }
+      
+      showToast('Checking status...', 'info');
+      
+      // Get all tokens and find the matching one
+      const allTokens = await getQueueStatus();
+      const token = allTokens.find(t => t.token_number === tokenNumber);
+      
+      const resultDiv = document.getElementById('queue-status-result');
+      
+      if (token) {
+        const position = allTokens.filter(t => 
+          t.department_id === token.department_id && 
+          t.status === 'waiting' && 
+          t.queue_position <= token.queue_position
+        ).length;
+        
+        resultDiv.innerHTML = `
+          <div style="background: #e0f2fe; padding: 1.5rem; border-radius: 12px; border: 2px solid #2563eb;">
+            <h3 style="margin-top: 0; color: #2563eb;">Token Status</h3>
+            <p><strong>Token Number:</strong> ${token.token_number}</p>
+            <p><strong>Patient Name:</strong> ${token.patient_name}</p>
+            <p><strong>Department:</strong> ${token.department_name}</p>
+            <p><strong>Status:</strong> <span style="color: ${token.status === 'serving' ? '#10b981' : '#f59e0b'}; font-weight: bold; text-transform: uppercase;">${token.status}</span></p>
+            <p><strong>Queue Position:</strong> ${position}</p>
+            ${token.priority_type !== 'no' ? `<p><strong>Priority:</strong> ${token.priority_type}</p>` : ''}
+          </div>
+        `;
+        resultDiv.classList.remove('hidden');
+        showToast('Token found!', 'success');
+      } else {
+        resultDiv.innerHTML = `
+          <div style="background: #fee; padding: 1.5rem; border-radius: 12px; border: 2px solid #ef4444;">
+            <p style="color: #ef4444; margin: 0;">Token not found or already completed.</p>
+          </div>
+        `;
+        resultDiv.classList.remove('hidden');
+        showToast('Token not found', 'error');
+      }
+    });
+    
+    }); // End window.addEventListener('load')
+  </script>
+</body>
+</html>

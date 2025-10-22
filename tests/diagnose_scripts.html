@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Script Diagnostics - QECH</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 900px;
+      margin: 2rem auto;
+      padding: 1rem;
+      background: #f5f5f5;
+    }
+    .card {
+      background: white;
+      padding: 1.5rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      margin-bottom: 1rem;
+    }
+    h1 { color: #2563eb; }
+    .status { padding: 0.5rem; border-radius: 4px; margin: 0.5rem 0; }
+    .success { background: #d1fae5; color: #065f46; }
+    .error { background: #fee2e2; color: #991b1b; }
+    .info { background: #dbeafe; color: #1e40af; }
+    pre { background: #1e293b; color: #10b981; padding: 1rem; border-radius: 4px; overflow-x: auto; }
+    button { background: #2563eb; color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 6px; cursor: pointer; margin: 0.5rem 0.5rem 0.5rem 0; }
+    button:hover { background: #1d4ed8; }
+  </style>
+</head>
+<body>
+  <h1>🔍 Script Loading Diagnostics</h1>
+  
+  <div class="card">
+    <h2>Script Loading Status</h2>
+    <div id="script-status">Checking...</div>
+  </div>
+
+  <div class="card">
+    <h2>Available Functions</h2>
+    <div id="function-status">Checking...</div>
+  </div>
+
+  <div class="card">
+    <h2>Test createQueueToken</h2>
+    <button onclick="testCreateToken()">Test Token Creation</button>
+    <div id="test-result"></div>
+  </div>
+
+  <div class="card">
+    <h2>Console Log</h2>
+    <pre id="console-log">Waiting for tests...</pre>
+  </div>
+
+  <!-- Load scripts in same order as patient.html -->
+  <script src="../js/auth.js" onerror="logError('auth.js failed to load')"></script>
+  <script src="../js/queue.js" onerror="logError('queue.js failed to load')"></script>
+  <script src="../js/style.js" onerror="logError('style.js failed to load')"></script>
+
+  <script>
+    const logEl = document.getElementById('console-log');
+    
+    function log(message, type = 'info') {
+      const timestamp = new Date().toLocaleTimeString();
+      logEl.textContent += `[${timestamp}] [${type.toUpperCase()}] ${message}\n`;
+      console.log(`[${type}]`, message);
+    }
+
+    function logError(message) {
+      log(message, 'error');
+    }
+
+    // Wait for all scripts to load
+    window.addEventListener('load', function() {
+      log('Page fully loaded', 'success');
+      checkScripts();
+      checkFunctions();
+    });
+
+    function checkScripts() {
+      const statusDiv = document.getElementById('script-status');
+      let html = '';
+
+      // Check if scripts loaded
+      const scripts = [
+        { name: 'auth.js', path: '../js/auth.js' },
+        { name: 'queue.js', path: '../js/queue.js' },
+        { name: 'style.js', path: '../js/style.js' }
+      ];
+
+      scripts.forEach(script => {
+        const loaded = document.querySelector(`script[src="${script.path}"]`) !== null;
+        const status = loaded ? 'success' : 'error';
+        const icon = loaded ? '✓' : '✗';
+        html += `<div class="status ${status}">${icon} ${script.name} - ${loaded ? 'Loaded' : 'NOT LOADED'}</div>`;
+        log(`${script.name}: ${loaded ? 'Loaded' : 'NOT LOADED'}`, loaded ? 'success' : 'error');
+      });
+
+      statusDiv.innerHTML = html;
+    }
+
+    function checkFunctions() {
+      const statusDiv = document.getElementById('function-status');
+      let html = '';
+
+      const functions = [
+        'createQueueToken',
+        'getQueueStatus',
+        'callNextPatient',
+        'refreshQueueDisplay',
+        'showToast',
+        'requireRole',
+        'login',
+        'register',
+        'logout'
+      ];
+
+      functions.forEach(funcName => {
+        const exists = typeof window[funcName] === 'function';
+        const status = exists ? 'success' : 'error';
+        const icon = exists ? '✓' : '✗';
+        html += `<div class="status ${status}">${icon} ${funcName}() - ${exists ? 'Available' : 'NOT FOUND'}</div>`;
+        log(`${funcName}: ${exists ? 'Available' : 'NOT FOUND'}`, exists ? 'success' : 'error');
+      });
+
+      statusDiv.innerHTML = html;
+    }
+
+    async function testCreateToken() {
+      const resultDiv = document.getElementById('test-result');
+      log('Testing createQueueToken...', 'info');
+
+      if (typeof createQueueToken !== 'function') {
+        resultDiv.innerHTML = '<div class="status error">✗ createQueueToken is not defined!</div>';
+        log('createQueueToken is NOT a function', 'error');
+        return;
+      }
+
+      const testData = {
+        patient_name: 'Test Patient',
+        patient_age: 30,
+        patient_phone: '+265 999 123 456',
+        patient_id_number: 'TEST123',
+        patient_address: 'Test Address',
+        service_type: 'Test Service',
+        department: 'opd',
+        priority_type: 'no'
+      };
+
+      log('Calling createQueueToken with test data...', 'info');
+      log(JSON.stringify(testData, null, 2), 'info');
+
+      try {
+        const result = await createQueueToken(testData);
+        log('Result received: ' + JSON.stringify(result, null, 2), 'success');
+
+        if (result && result.success) {
+          resultDiv.innerHTML = `
+            <div class="status success">
+              ✓ Token created successfully!<br>
+              Token: ${result.token.token_number}<br>
+              Position: ${result.token.queue_position}
+            </div>
+          `;
+          log('Token created: ' + result.token.token_number, 'success');
+        } else {
+          resultDiv.innerHTML = `<div class="status error">✗ Failed: ${result.message}</div>`;
+          log('Token creation failed: ' + result.message, 'error');
+        }
+      } catch (error) {
+        resultDiv.innerHTML = `<div class="status error">✗ Error: ${error.message}</div>`;
+        log('Exception: ' + error.message, 'error');
+        log('Stack: ' + error.stack, 'error');
+      }
+    }
+
+    // Log initial state
+    log('Script diagnostics page loaded', 'info');
+    log('Waiting for window.load event...', 'info');
+  </script>
+</body>
+</html>
