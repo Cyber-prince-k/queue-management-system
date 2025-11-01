@@ -11,7 +11,7 @@
     <div class="container">
       <div class="logo-container">
         <div>
-          <img src="https://via.placeholder.com/60x60/2c7fb8/ffffff?text=QECH" alt="QECH Logo" class="logo" />
+          <img src="../images/Screenshot 2025-11-01 111731.png" alt="QECH Logo" class="logo" />
           <div>
             <h1 data-i18n="hospital_name">Queen Elizabeth Central Hospital</h1>
             <h2 data-i18n="system_name">Digital Queue Management System</h2>
@@ -21,9 +21,6 @@
       <nav aria-label="Primary">
         <ul>
           <li><a class="btn btn-secondary" href="../index.html" data-i18n="nav_home">Home</a></li>
-          <li><a class="btn btn-secondary" href="patient.html" data-i18n="nav_patient">Patient</a></li>
-          <li><a class="btn btn-secondary" href="staff.html" data-i18n="nav_staff">Staff</a></li>
-          <li><a class="btn btn-secondary" href="admin.html" data-i18n="nav_admin">Admin</a></li>
           <li><a class="btn btn-primary" href="display.html" data-i18n="nav_display">Public Display</a></li>
           <li>
             <label for="language-select" class="visually-hidden">Language</label>
@@ -123,34 +120,14 @@
       updateQueuesOverview();
     }
 
-    // Filter logic for queues overview using DOM toggles
+    // On Apply, redirect to Patient registration page with selected department
     document.getElementById('queues-filter-form').addEventListener('submit', function(e) {
       e.preventDefault();
       const dept = document.getElementById('queues-dept').value;
-      const priority = document.getElementById('queues-priority').value;
-
-      // Always start from full render
-      if (typeof updateQueuesOverview === 'function') updateQueuesOverview();
-
-      document.querySelectorAll('[data-queues-section]').forEach(sec => {
-        const code = sec.getAttribute('data-queues-section');
-        // Department filter
-        sec.style.display = (dept !== 'all' && dept !== code) ? 'none' : '';
-
-        // Priority filter by hiding items
-        const list = sec.querySelector('[data-queue-list]');
-        if (!list) return;
-        const items = list.querySelectorAll('.queue-item');
-        items.forEach(item => {
-          if (priority === 'all') {
-            item.style.display = '';
-          } else if (priority === 'priority') {
-            item.style.display = item.classList.contains('priority-item') ? '' : 'none';
-          } else if (priority === 'regular') {
-            item.style.display = item.classList.contains('priority-item') ? 'none' : '';
-          }
-        });
-      });
+      const target = new URL('patient.html', window.location.origin + window.location.pathname.replace(/\/html\/queues\.html$/, '/html/'));
+      if (dept && dept !== 'all') target.searchParams.set('department', dept);
+      target.searchParams.set('from', 'queues');
+      window.location.href = target.toString();
     });
   </script>
 </body>

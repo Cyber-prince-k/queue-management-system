@@ -43,7 +43,7 @@ const translations = {
         dept_emergency: 'Emergency',
         dept_pediatrics: 'Pediatrics',
         footer_line1: '© 2023 Queen Elizabeth Central Hospital - Digital Queue Management System',
-        footer_line2: 'Developed as part of NACIT Advanced Diploma in Computing Project',
+        footer_line2: '',
     },
     ny: {
         hospital_name: 'Chipatala cha Mfumukazi Elizabeth',
@@ -67,7 +67,7 @@ const translations = {
         dept_emergency: 'Emergency',
         dept_pediatrics: 'Pediatrics',
         footer_line1: '© 2023 Chipatala cha Mfumukazi Elizabeth - Dongosolo Laukadaulo la Mzere',
-        footer_line2: 'Zapangidwa monga gawo la polojekiti ya NACIT Advanced Diploma in Computing',
+        footer_line2: '',
     }
 };
 
@@ -134,6 +134,12 @@ function guardRoleProtectedPages() {
 function renderAuthNav() {
     const navList = document.querySelector('header nav ul');
     if (!navList) return;
+    const page = location.pathname.split('/').pop() || 'index.html';
+    if (page === 'index.html') {
+        const existing = document.getElementById('auth-slot');
+        if (existing && existing.parentNode) existing.parentNode.removeChild(existing);
+        return; // hide auth buttons on homepage
+    }
     let slot = document.getElementById('auth-slot');
     if (!slot) {
         slot = document.createElement('li');

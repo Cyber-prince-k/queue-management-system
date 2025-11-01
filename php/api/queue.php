@@ -12,6 +12,7 @@ if ($method === 'POST' && isset($_GET['action']) && $_GET['action'] === 'create'
     $patient_age = $data['patient_age'] ?? null;
     $patient_phone = $data['patient_phone'] ?? '';
     $patient_id_number = $data['patient_id_number'] ?? '';
+    $patient_email = $data['patient_email'] ?? '';
     $patient_address = $data['patient_address'] ?? '';
     $service_type = $data['service_type'] ?? '';
     $department_code = $data['department'] ?? '';
@@ -19,6 +20,11 @@ if ($method === 'POST' && isset($_GET['action']) && $_GET['action'] === 'create'
     
     if (empty($patient_name) || empty($department_code)) {
         echo json_encode(['success' => false, 'message' => 'Patient name and department required']);
+        exit();
+    }
+    // Optional: validate email if provided
+    if (!empty($patient_email) && !filter_var($patient_email, FILTER_VALIDATE_EMAIL)) {
+        echo json_encode(['success' => false, 'message' => 'Invalid email format']);
         exit();
     }
     
@@ -55,8 +61,8 @@ if ($method === 'POST' && isset($_GET['action']) && $_GET['action'] === 'create'
     
     // Insert token
     $patient_id = $_SESSION['user_id'] ?? null;
-    $stmt = $conn->prepare("INSERT INTO queue_tokens (token_number, patient_id, patient_name, patient_age, patient_phone, patient_id_number, patient_address, service_type, department_id, priority_type, queue_position) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-    $stmt->bind_param("sisissssisi", $token_number, $patient_id, $patient_name, $patient_age, $patient_phone, $patient_id_number, $patient_address, $service_type, $department_id, $priority_type, $queue_position);
+    $stmt = $conn->prepare("INSERT INTO queue_tokens (token_number, patient_id, patient_name, patient_age, patient_phone, patient_email, patient_id_number, patient_address, service_type, department_id, priority_type, queue_position) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+    $stmt->bind_param("sisisssssisi", $token_number, $patient_id, $patient_name, $patient_age, $patient_phone, $patient_email, $patient_id_number, $patient_address, $service_type, $department_id, $priority_type, $queue_position);
     
     if ($stmt->execute()) {
         $token_id = $conn->insert_id;
@@ -66,10 +72,22 @@ if ($method === 'POST' && isset($_GET['action']) && $_GET['action'] === 'create'
         $stmt->bind_param("ii", $token_id, $patient_id);
         $stmt->execute();
         
-        // Send SMS notification with queue position if phone is provided
+        // Send notifications (best-effort) with status collection
+        $notify_status = ['sms' => null, 'email' => null];
+        $msg = "QECH: Hi $patient_name, your token {$token_number} is created. Your current position is #{$queue_position}. We'll notify you when it's your turn.";
         if (!empty($patient_phone)) {
-            $msg = "QECH: Hi $patient_name, your token {$token_number} is created. Your current position is #{$queue_position}. We'll notify you when it's your turn.";
-            try { send_sms_notification($patient_phone, $msg); } catch (Exception $e) { /* ignore */ }
+            try {
+                $notify_status['sms'] = send_sms_notification($patient_phone, $msg);
+            } catch (Throwable $e) {
+                $notify_status['sms'] = ['success' => false, 'message' => $e->getMessage()];
+            }
+        }
+        if (!empty($patient_email)) {
+            try {
+                $notify_status['email'] = send_email_notification($patient_email, 'Your QECH Queue Token', $msg);
+            } catch (Throwable $e) {
+                $notify_status['email'] = ['success' => false, 'message' => $e->getMessage()];
+            }
         }
         
         echo json_encode([
@@ -79,7 +97,8 @@ if ($method === 'POST' && isset($_GET['action']) && $_GET['action'] === 'create'
                 'id' => $token_id,
                 'token_number' => $token_number,
                 'queue_position' => $queue_position
-            ]
+            ],
+            'notifications' => $notify_status
         ]);
     } else {
         echo json_encode(['success' => false, 'message' => 'Failed to create token: ' . $stmt->error]);
@@ -154,7 +173,7 @@ elseif ($method === 'POST' && isset($_GET['action']) && $_GET['action'] === 'cal
     
     // Get next token (priority first)
     $stmt = $conn->prepare("
-        SELECT id, token_number, patient_phone, patient_name FROM queue_tokens 
+        SELECT id, token_number, patient_phone, patient_name, patient_email FROM queue_tokens 
         WHERE department_id = ? AND status = 'waiting'
         ORDER BY priority_type DESC, queue_position ASC
         LIMIT 1
@@ -182,17 +201,30 @@ elseif ($method === 'POST' && isset($_GET['action']) && $_GET['action'] === 'cal
     $stmt->bind_param("ii", $token_id, $staff_id);
     $stmt->execute();
     
-    // Send SMS notification to patient that it's their turn
+    // Notify patient (SMS and Email) that it's their turn
+    $deptMsg = strtoupper($department_code);
+    $turnMsg = "QECH: $deptMsg now serving token {$token['token_number']}. Please proceed to the desk.";
+    $notify_status = ['sms' => null, 'email' => null];
     if (!empty($token['patient_phone'])) {
-        $deptMsg = strtoupper($department_code);
-        $msg = "QECH: $deptMsg now serving token {$token['token_number']}. Please proceed to the desk.";
-        try { send_sms_notification($token['patient_phone'], $msg); } catch (Exception $e) { /* ignore */ }
+        try {
+            $notify_status['sms'] = send_sms_notification($token['patient_phone'], $turnMsg);
+        } catch (Throwable $e) {
+            $notify_status['sms'] = ['success' => false, 'message' => $e->getMessage()];
+        }
+    }
+    if (!empty($token['patient_email'])) {
+        try {
+            $notify_status['email'] = send_email_notification($token['patient_email'], 'It\'s your turn', $turnMsg);
+        } catch (Throwable $e) {
+            $notify_status['email'] = ['success' => false, 'message' => $e->getMessage()];
+        }
     }
     
     echo json_encode([
         'success' => true,
         'message' => 'Patient called',
-        'token' => $token
+        'token' => $token,
+        'notifications' => $notify_status
     ]);
     
     $stmt->close();

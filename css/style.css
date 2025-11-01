@@ -108,11 +108,14 @@ header .container {
 }
 
 .logo {
-    height: 60px;
-    width: 60px;
-    border-radius: 12px;
+    height: 72px;
+    width: 72px;
+    border-radius: 6px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-    object-fit: cover;
+    object-fit: contain; /* show full image */
+    object-position: center;
+    background-color: transparent;
+    padding: 0;
 }
 
 .container {

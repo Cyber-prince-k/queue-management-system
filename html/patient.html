@@ -14,7 +14,7 @@
     <div class="container">
       <div class="logo-container">
         <div>
-          <img src="https://via.placeholder.com/60x60/2c7fb8/ffffff?text=QECH" alt="QECH Logo" class="logo" />
+          <img src="../images/Screenshot 2025-11-01 111731.png" alt="QECH Logo" class="logo" />
           <div>
             <h1 data-i18n="hospital_name">Queen Elizabeth Central Hospital</h1>
             <h2 data-i18n="system_name">Digital Queue Management System</h2>
@@ -24,8 +24,6 @@
       <nav aria-label="Primary">
         <ul>
           <li><a class="btn btn-secondary" href="../index.html" data-i18n="nav_home">Home</a></li>
-          <li><a class="btn btn-secondary" href="patient.html" data-i18n="nav_patient">Patient</a></li>
-          <li><a class="btn btn-secondary" href="queues.html" data-i18n="nav_queues">Queues</a></li>
           <li><a class="btn btn-primary" href="display.html" data-i18n="nav_display">Public Display</a></li>
           <li id="user-info" style="display: flex; align-items: center; gap: 0.5rem;"></li>
         </ul>
@@ -70,6 +68,11 @@
           <div class="form-group">
             <label for="patient-phone">Phone Number <span style="color: #ef4444;">*</span></label>
             <input type="tel" id="patient-phone" name="patient-phone" placeholder="e.g., +265 999 123 456" required />
+          </div>
+          
+          <div class="form-group">
+            <label for="patient-email">Email Address</label>
+            <input type="email" id="patient-email" name="patient-email" placeholder="your.email@example.com" />
           </div>
           
           <div class="form-group">
@@ -128,8 +131,8 @@
         <h3>Check Queue Status</h3>
         <form id="queue-status-form">
           <div class="form-group">
-            <label for="queue-token">Token Number</label>
-            <input type="text" id="queue-token" name="queue-token" required />
+            <label for="queue-token">Token or Appointment Number</label>
+            <input type="text" id="queue-token" name="queue-token" placeholder="Paste your queue token (e.g., OPD-20251101-0001) or appointment number (e.g., OPD202511010001)" required />
           </div>
           <button type="submit" class="btn btn-primary">Check Status</button>
         </form>
@@ -726,6 +729,7 @@
         patient_name: document.getElementById('patient-name').value,
         patient_age: parseInt(document.getElementById('patient-age').value),
         patient_phone: document.getElementById('patient-phone').value,
+        patient_email: document.getElementById('patient-email').value || '',
         patient_id_number: document.getElementById('patient-id').value,
         patient_address: document.getElementById('patient-address').value,
         service_type: document.getElementById('service-type').value,
@@ -797,47 +801,72 @@
       }
     });
 
-    // Queue status check form handler
+    // Queue or Appointment status check form handler (single place)
     document.getElementById('queue-status-form').addEventListener('submit', async (e) => {
       e.preventDefault();
-      
-      const tokenNumber = document.getElementById('queue-token').value;
-      
-      if (!tokenNumber) {
-        showToast('error', 'Please enter a token number');
-        return;
-      }
-      
-      showToast('info', 'Checking status...');
-      
-      // Get all tokens and find the matching one
-      const allTokens = await getQueueStatus();
-      const token = allTokens.find(t => t.token_number === tokenNumber);
-      
+      const tokenNumber = (document.getElementById('queue-token').value || '').trim();
+      if (!tokenNumber) { if (typeof showToast === 'function') showToast('error', 'Please enter a token or appointment number'); return; }
+      if (typeof showToast === 'function') showToast('info', 'Checking status...');
+
       const resultDiv = document.getElementById('queue-status-result');
-      
-      if (token) {
-        const position = allTokens.filter(t => 
-          t.department_id === token.department_id && 
-          t.status === 'waiting' && 
-          t.queue_position <= token.queue_position
-        ).length;
-        
+      resultDiv.classList.remove('hidden');
+
+      // Heuristic: Queue tokens contain hyphens (e.g., OPD-YYYYMMDD-####); Appointments typically do not
+      const isQueueToken = tokenNumber.includes('-');
+
+      try {
+        if (isQueueToken) {
+          // Query queue status by fetching all and matching token
+          const allTokens = await getQueueStatus();
+          const token = (allTokens || []).find(t => t.token_number === tokenNumber);
+          if (token) {
+            const position = allTokens.filter(t => t.department_id === token.department_id && t.status === 'waiting' && t.queue_position <= token.queue_position).length;
+            resultDiv.innerHTML = `
+              <div style="background: #e0f2fe; padding: 1.5rem; border-radius: 12px; border: 2px solid #2563eb;">
+                <h4 style="margin:0 0 .5rem 0; color:#1e3a8a;">Queue Token Status</h4>
+                <p><strong>Token:</strong> ${token.token_number}</p>
+                <p><strong>Status:</strong> ${token.status}</p>
+                <p><strong>Current Position:</strong> #${position}</p>
+              </div>
+            `;
+            if (typeof showToast === 'function') showToast('success', 'Queue status found');
+            return;
+          }
+          // If not found as queue token, fall through to try as appointment number
+        }
+
+        // Try appointment number lookup
+        const appt = await getAppointmentByNumber(tokenNumber);
+        if (appt && appt.success && appt.appointment) {
+          const a = appt.appointment;
+          const dt = new Date(a.appointment_date + ' ' + a.appointment_time);
+          const dstr = dt.toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' });
+          const tstr = dt.toLocaleTimeString('en-US', { hour:'2-digit', minute:'2-digit' });
+          const statusColors = { pending:'#f59e0b', confirmed:'#10b981', queued:'#2563eb', completed:'#6b7280', cancelled:'#ef4444' };
+          resultDiv.innerHTML = `
+            <div style="background: #f0fdf4; padding: 1.5rem; border-radius: 12px; border: 2px solid #10b981;">
+              <h4 style="margin:0 0 .5rem 0; color:#065f46;">Appointment Status</h4>
+              <p><strong>Appointment #:</strong> ${a.appointment_number}</p>
+              <p><strong>Department:</strong> ${a.department_name || a.department_code || ''}</p>
+              <p><strong>Date:</strong> ${dstr} <strong>Time:</strong> ${tstr}</p>
+              <p><strong>Status:</strong> <span style="color:${statusColors[a.status]||'#334155'}; font-weight:bold; text-transform:uppercase;">${a.status}</span></p>
+            </div>
+          `;
+          if (typeof showToast === 'function') showToast('success', 'Appointment found');
+          return;
+        }
+
+        // Not found in either
         resultDiv.innerHTML = `
-          <div style="background: #e0f2fe; padding: 1.5rem; border-radius: 12px; border: 2px solid #2563eb;">
-            <h3 style="margin-top: 0; color: #2563eb;">Token Status</h3>
-            <p><strong>Token Number:</strong> ${token.token_number}</p>
-            <p><strong>Patient Name:</strong> ${token.patient_name}</p>
-            <p><strong>Department:</strong> ${token.department_name}</p>
-            <p><strong>Status:</strong> <span style="color: ${token.status === 'serving' ? '#10b981' : '#f59e0b'}; font-weight: bold; text-transform: uppercase;">${token.status}</span></p>
-            <p><strong>Queue Position:</strong> ${position}</p>
-            ${token.priority_type !== 'no' ? `<p><strong>Priority:</strong> ${token.priority_type}</p>` : ''}
+          <div style="background: #fee2e2; padding: 1.5rem; border-radius: 12px; border: 2px solid #ef4444;">
+            <p style="color: #ef4444; margin: 0;">Not found. Please check the number and try again.</p>
           </div>
         `;
-        resultDiv.classList.remove('hidden');
-        showToast('success', 'Token found!');
-      } else {
+        if (typeof showToast === 'function') showToast('error', 'Not found');
+      } catch (err) {
         resultDiv.innerHTML = `
+          <div style="background: #fee2e2; padding: 1.5rem; border-radius: 12px; border: 2px solid #ef4444;">
+            <p style="color: #ef4444; margin: 0;">Error checking status. Please try again.</p>
           <div style="background: #fee; padding: 1.5rem; border-radius: 12px; border: 2px solid #ef4444;">
             <p style="color: #ef4444; margin: 0;">Token not found or already completed.</p>
           </div>
