@@ -4,6 +4,23 @@ if (typeof API_BASE_URL === 'undefined') {
     var API_BASE_URL = 'http://localhost/queue%20system/php/api';
 }
 
+// Promote due appointments into queue tokens (backend-driven)
+async function promoteDueAppointments(departmentCode = '') {
+    try {
+        const url = departmentCode
+            ? `${API_BASE_URL}/appointments.php?action=promote-due&department=${encodeURIComponent(departmentCode)}`
+            : `${API_BASE_URL}/appointments.php?action=promote-due`;
+        const res = await fetch(url, { method: 'GET', credentials: 'include' });
+        if (!res.ok) {
+            return { success: false };
+        }
+        const data = await res.json();
+        return data;
+    } catch (e) {
+        return { success: false };
+    }
+}
+
 // Safe toast wrapper - only calls showToast if it exists
 function safeToast(message, type = 'info') {
     if (typeof showToast === 'function') {
@@ -304,6 +321,8 @@ function fallbackCopyToClipboard(text) {
 
 // Refresh queue display
 async function refreshQueueDisplay(departmentCode, showActions = false) {
+    // First, promote any due appointments for this department (idempotent on backend)
+    await promoteDueAppointments(departmentCode);
     const tokens = await getQueueStatus(departmentCode);
     
     const queueList = document.getElementById('queue-list');

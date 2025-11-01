@@ -50,9 +50,34 @@
 
         <div class="admin-card">
           <h3>Reports</h3>
-          <div class="report-options">
-            <button id="daily-report-btn" class="btn btn-primary">Generate Daily Report</button>
-            <button id="weekly-report-btn" class="btn btn-primary">Generate Weekly Report</button>
+          <p style="margin:.25rem 0 1rem; color:#475569;">Using data stored in the system, you can generate summaries such as the number of patients served, average waiting times, and the busiest departments. These insights help staff and administrators identify challenges and improve hospital operations.</p>
+          <div class="report-options" style="display: flex; flex-direction: column; gap: .75rem;">
+            <div style="display:flex; gap:.5rem; flex-wrap:wrap; align-items:end;">
+              <div>
+                <label for="report-start" style="display:block; font-size:.9rem; color:#334155;">Start Date</label>
+                <input type="date" id="report-start" />
+              </div>
+              <div>
+                <label for="report-end" style="display:block; font-size:.9rem; color:#334155;">End Date</label>
+                <input type="date" id="report-end" />
+              </div>
+              <div>
+                <label for="report-dept" style="display:block; font-size:.9rem; color:#334155;">Department</label>
+                <select id="report-dept">
+                  <option value="">All</option>
+                  <option value="opd">OPD</option>
+                  <option value="maternity">Maternity</option>
+                  <option value="emergency">Emergency</option>
+                  <option value="pediatrics">Pediatrics</option>
+                </select>
+              </div>
+              <div style="display:flex; gap:.5rem;">
+                <button id="daily-report-btn" class="btn btn-primary">Generate Daily Report</button>
+                <button id="weekly-report-btn" class="btn btn-primary">Generate Weekly Report</button>
+                <button id="filtered-report-btn" class="btn btn-secondary">Run Filtered</button>
+                <button id="export-pdf-btn" class="btn">Export PDF</button>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -99,11 +124,118 @@
     </div>
   </footer>
 
+  <script>
+    if (typeof API_BASE_URL === 'undefined') {
+      var API_BASE_URL = 'http://localhost/queue%20system/php/api';
+    }
+  </script>
   <script src="../js/auth.js"></script>
   <script src="../js/style.js"></script>
   <script>
-    // Require admin role only
-    requireRole(['admin']);
+    // Wait for page to fully load before checking role
+    window.addEventListener('load', function() {
+      console.log('=== ADMIN.HTML LOADED ===');
+      // Require admin role only
+      const hasAccess = requireRole(['admin']);
+      if (!hasAccess) {
+        console.error('Access denied, requireRole returned false');
+      }
+
+      // Bind report buttons defensively (in case external JS didn't attach)
+      var dailyBtn = document.getElementById('daily-report-btn');
+      if (dailyBtn && typeof generateReport === 'function') {
+        dailyBtn.onclick = function() { generateReport('daily'); };
+      }
+      var weeklyBtn = document.getElementById('weekly-report-btn');
+      if (weeklyBtn && typeof generateReport === 'function') {
+        weeklyBtn.onclick = function() { generateReport('weekly'); };
+      }
+      var filteredBtn = document.getElementById('filtered-report-btn');
+      if (filteredBtn && typeof generateFilteredReport === 'function') {
+        filteredBtn.onclick = function() { generateFilteredReport(); };
+      }
+      var exportBtn = document.getElementById('export-pdf-btn');
+      if (exportBtn && typeof exportReportPDF === 'function') {
+        exportBtn.onclick = function() { exportReportPDF(); };
+      }
+
+      // Load stats defensively
+      if (typeof loadAdminStats === 'function') {
+        loadAdminStats();
+      }
+    });
+
+    // Fallback implementations if external JS did not define them
+    (function(){
+      function apiBase(){ return (typeof API_BASE_URL !== 'undefined' && API_BASE_URL) ? API_BASE_URL : (window.location.origin + '/queue%20system/php/api'); }
+
+      if (typeof window.loadAdminStats !== 'function') {
+        window.loadAdminStats = async function(){
+          try {
+            const res = await fetch(apiBase() + '/admin.php?action=stats', { credentials: 'include' });
+            const data = await res.json();
+            var t=document.getElementById('total-patients'); if(t) t.textContent = data.total_patients_today || 0;
+            var a=document.getElementById('avg-wait-time'); if(a) a.textContent = (data.avg_wait_time_minutes||0) + ' min';
+            var w=document.getElementById('currently-waiting'); if(w) w.textContent = data.currently_waiting || 0;
+          } catch(e){ console.error('Fallback loadAdminStats failed', e); }
+        }
+      }
+
+      if (typeof window.generateReport !== 'function') {
+        window.generateReport = async function(period){
+          try {
+            const res = await fetch(apiBase() + '/admin.php?action=report&period=' + encodeURIComponent(period||'daily'), { credentials: 'include' });
+            const data = await res.json();
+            var out = document.getElementById('report-output'); if(!out) return;
+            const byDept = (data.by_department||[]).map(d=>`${d.name} (${d.code}): ${d.total}`).join(', ');
+            out.classList.remove('hidden');
+            out.innerHTML = '<div class="card">'
+              + '<h4 style="margin-top:0">' + (period==='weekly'?'Weekly':'Daily') + ' Report</h4>'
+              + '<p><strong>Patients served:</strong> ' + (data.patients_served||0) + '</p>'
+              + '<p><strong>Average wait time:</strong> ' + (data.avg_wait_time_minutes||0) + ' min</p>'
+              + '<p><strong>Busiest departments:</strong> ' + (byDept||'-') + '</p>'
+              + '</div>';
+          } catch(e){ console.error('Fallback generateReport failed', e); }
+        }
+      }
+
+      if (typeof window.generateFilteredReport !== 'function') {
+        window.generateFilteredReport = async function(){
+          const s = document.getElementById('report-start')?.value || '';
+          const e = document.getElementById('report-end')?.value || '';
+          const d = document.getElementById('report-dept')?.value || '';
+          try {
+            const params = new URLSearchParams({ action:'report' });
+            if (s) params.append('start_date', s); if (e) params.append('end_date', e); if (d) params.append('department', d);
+            const res = await fetch(apiBase() + '/admin.php?' + params.toString(), { credentials: 'include' });
+            const data = await res.json();
+            var out = document.getElementById('report-output'); if(!out) return;
+            const byDept = (data.by_department||[]).map(x=>`${x.name} (${x.code}): ${x.total}`).join(', ');
+            out.classList.remove('hidden');
+            out.innerHTML = '<div class="card">'
+              + '<h4 style="margin-top:0">Filtered Report</h4>'
+              + '<p><strong>Patients served:</strong> ' + (data.patients_served||0) + '</p>'
+              + '<p><strong>Average wait time:</strong> ' + (data.avg_wait_time_minutes||0) + ' min</p>'
+              + '<p><strong>Busiest departments:</strong> ' + (byDept||'-') + '</p>'
+              + '</div>';
+          } catch(err){ console.error('Fallback generateFilteredReport failed', err); }
+        }
+      }
+
+      if (typeof window.exportReportPDF !== 'function') {
+        window.exportReportPDF = function(){
+          const s = document.getElementById('report-start')?.value || '';
+          const e = document.getElementById('report-end')?.value || '';
+          const d = document.getElementById('report-dept')?.value || '';
+          const p = new URLSearchParams({ action:'report_pdf' });
+          if (s) p.append('start_date', s); if (e) p.append('end_date', e); if (d) p.append('department', d);
+          window.open(apiBase() + '/admin.php?' + p.toString(), '_blank');
+        }
+      }
+
+      // Auto-init stats
+      try { window.loadAdminStats && window.loadAdminStats(); } catch(_){}
+    })();
   </script>
 </body>
 </html>

@@ -1,5 +1,6 @@
 <?php
 require_once '../config.php';
+require_once __DIR__ . '/notify_util.php';
 
 $method = $_SERVER['REQUEST_METHOD'];
 
@@ -64,6 +65,12 @@ if ($method === 'POST' && isset($_GET['action']) && $_GET['action'] === 'create'
         $stmt = $conn->prepare("INSERT INTO queue_history (token_id, action, performed_by) VALUES (?, 'created', ?)");
         $stmt->bind_param("ii", $token_id, $patient_id);
         $stmt->execute();
+        
+        // Send SMS notification with queue position if phone is provided
+        if (!empty($patient_phone)) {
+            $msg = "QECH: Hi $patient_name, your token {$token_number} is created. Your current position is #{$queue_position}. We'll notify you when it's your turn.";
+            try { send_sms_notification($patient_phone, $msg); } catch (Exception $e) { /* ignore */ }
+        }
         
         echo json_encode([
             'success' => true,
@@ -147,7 +154,7 @@ elseif ($method === 'POST' && isset($_GET['action']) && $_GET['action'] === 'cal
     
     // Get next token (priority first)
     $stmt = $conn->prepare("
-        SELECT id, token_number FROM queue_tokens 
+        SELECT id, token_number, patient_phone, patient_name FROM queue_tokens 
         WHERE department_id = ? AND status = 'waiting'
         ORDER BY priority_type DESC, queue_position ASC
         LIMIT 1
@@ -174,6 +181,13 @@ elseif ($method === 'POST' && isset($_GET['action']) && $_GET['action'] === 'cal
     $stmt = $conn->prepare("INSERT INTO queue_history (token_id, action, performed_by) VALUES (?, 'called', ?)");
     $stmt->bind_param("ii", $token_id, $staff_id);
     $stmt->execute();
+    
+    // Send SMS notification to patient that it's their turn
+    if (!empty($token['patient_phone'])) {
+        $deptMsg = strtoupper($department_code);
+        $msg = "QECH: $deptMsg now serving token {$token['token_number']}. Please proceed to the desk.";
+        try { send_sms_notification($token['patient_phone'], $msg); } catch (Exception $e) { /* ignore */ }
+    }
     
     echo json_encode([
         'success' => true,

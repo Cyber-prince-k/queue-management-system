@@ -41,12 +41,12 @@ async function checkSession() {
 async function login(username, password) {
     // Validate inputs
     if (!username || !password) {
-        showToast('Please enter both username and password', 'error');
+        showToast('error', 'Please enter both username and password');
         return { success: false, message: 'Missing credentials' };
     }
 
     try {
-        showToast('Logging in...', 'info');
+        showToast('info', 'Logging in...');
         
         const response = await fetch(`${API_BASE_URL}/auth.php?action=login`, {
             method: 'POST',
@@ -68,14 +68,14 @@ async function login(username, password) {
             // Store user info in localStorage (use 'session_user' to match style.js)
             localStorage.setItem('session_user', JSON.stringify(data.user));
             
-            showToast(`Welcome back, ${data.user.full_name}!`, 'success');
+            showToast('success', `Welcome back, ${data.user.full_name}!`);
             
             // Redirect after short delay to show success message
             setTimeout(() => {
                 redirectToDashboard(data.user.role);
             }, 1000);
         } else {
-            showToast(data.message || 'Login failed. Please check your credentials.', 'error');
+            showToast('error', data.message || 'Login failed. Please check your credentials.');
         }
         
         return data;
@@ -83,11 +83,11 @@ async function login(username, password) {
         console.error('Login error:', error);
         
         if (error.message.includes('Failed to fetch')) {
-            showToast('Cannot connect to server. Please ensure XAMPP is running.', 'error');
+            showToast('error', 'Cannot connect to server. Please ensure XAMPP is running.');
         } else if (error.message.includes('HTTP error')) {
-            showToast('Server error. Please try again later.', 'error');
+            showToast('error', 'Server error. Please try again later.');
         } else {
-            showToast('Login failed. Please try again.', 'error');
+            showToast('error', 'Login failed. Please try again.');
         }
         
         return { success: false, message: error.message };
@@ -98,24 +98,24 @@ async function login(username, password) {
 async function register(username, password, fullName, role) {
     // Validate inputs
     if (!username || !password || !fullName || !role) {
-        showToast('Please fill in all required fields', 'error');
+        showToast('error', 'Please fill in all required fields');
         return { success: false, message: 'Missing required fields' };
     }
 
     // Validate username length
     if (username.length < 3) {
-        showToast('Username must be at least 3 characters long', 'error');
+        showToast('error', 'Username must be at least 3 characters long');
         return { success: false, message: 'Username too short' };
     }
 
     // Validate password length
     if (password.length < 6) {
-        showToast('Password must be at least 6 characters long', 'error');
+        showToast('error', 'Password must be at least 6 characters long');
         return { success: false, message: 'Password too short' };
     }
 
     try {
-        showToast('Creating account...', 'info');
+        showToast('info', 'Creating account...');
         
         const response = await fetch(`${API_BASE_URL}/auth.php?action=register`, {
             method: 'POST',
@@ -139,14 +139,14 @@ async function register(username, password, fullName, role) {
         const data = await response.json();
         
         if (data.success) {
-            showToast('✓ Account created successfully! Redirecting to login...', 'success');
+            showToast('success', '✓ Account created successfully! Redirecting to login...');
             
             // Redirect to login page after 2 seconds
             setTimeout(() => {
                 window.location.href = 'login.html';
             }, 2000);
         } else {
-            showToast(data.message || 'Registration failed. Please try again.', 'error');
+            showToast('error', data.message || 'Registration failed. Please try again.');
         }
         
         return data;
@@ -154,21 +154,21 @@ async function register(username, password, fullName, role) {
         console.error('Registration error:', error);
         
         if (error.message.includes('Failed to fetch')) {
-            showToast('Cannot connect to server. Please ensure XAMPP is running.', 'error');
+            showToast('error', 'Cannot connect to server. Please ensure XAMPP is running.');
         } else if (error.message.includes('HTTP error')) {
-            showToast('Server error. Please try again later.', 'error');
+            showToast('error', 'Server error. Please try again later.');
         } else {
-            showToast('Registration failed. Please try again.', 'error');
+            showToast('error', 'Registration failed. Please try again.');
         }
         
         return { success: false, message: error.message };
     }
 }
 
-// Logout function
+// Logout function - works across all tabs/windows
 async function logout() {
     try {
-        showToast('Logging out...', 'info');
+        showToast('info', 'Logging out...');
         
         const response = await fetch(`${API_BASE_URL}/auth.php?action=logout`, {
             method: 'POST',
@@ -182,26 +182,40 @@ async function logout() {
         const data = await response.json();
         
         if (data.success) {
-            localStorage.removeItem('session_user');
-            showToast('Logged out successfully', 'success');
-            
-            setTimeout(() => {
-                window.location.href = '../index.html';
-            }, 500);
+            // Clear session and broadcast logout to all tabs
+            performLogout('Logged out successfully');
         } else {
-            showToast('Logout failed. Please try again.', 'error');
+            showToast('error', 'Logout failed. Please try again.');
         }
     } catch (error) {
         console.error('Logout error:', error);
         
         // Even if server request fails, clear local data
-        localStorage.removeItem('session_user');
-        showToast('Logged out (offline)', 'info');
-        
-        setTimeout(() => {
-            window.location.href = '../index.html';
-        }, 500);
+        performLogout('Logged out (offline)');
     }
+}
+
+// Perform logout and broadcast to all tabs/windows
+function performLogout(message) {
+    // Clear session data
+    localStorage.removeItem('session_user');
+    
+    // Broadcast logout event to all tabs using localStorage event
+    // This triggers storage event in other tabs
+    localStorage.setItem('logout_event', Date.now().toString());
+    localStorage.removeItem('logout_event');
+    
+    showToast('success', message);
+    
+    // Redirect to home page
+    setTimeout(() => {
+        const currentPath = window.location.pathname;
+        if (currentPath.includes('/html/')) {
+            window.location.href = '../index.html';
+        } else {
+            window.location.href = 'index.html';
+        }
+    }, 500);
 }
 
 // Redirect to appropriate dashboard based on role
@@ -225,21 +239,35 @@ function getCurrentUser() {
 
 // Check if user has required role
 function requireRole(allowedRoles) {
+    console.log('requireRole called with:', allowedRoles);
     const user = getCurrentUser();
+    console.log('getCurrentUser returned:', user);
     
     if (!user) {
-        window.location.href = '../html/login.html';
+        console.error('No user found in session, redirecting to login');
+        // Inform the user before redirecting
+        if (typeof showToast === 'function') {
+            showToast('error', 'Please login to access this page.');
+        }
+        setTimeout(() => {
+            window.location.href = '../html/login.html';
+        }, 1200);
         return false;
     }
     
+    console.log('User role:', user.role);
+    console.log('Allowed roles:', allowedRoles);
+    
     if (!allowedRoles.includes(user.role)) {
-        showToast('Access denied. Insufficient permissions.', 'error');
+        console.error('User role not in allowed roles');
+        showToast('error', 'Access denied. Insufficient permissions.');
         setTimeout(() => {
             redirectToDashboard(user.role);
         }, 1500);
         return false;
     }
     
+    console.log('Access granted!');
     return true;
 }
 
@@ -281,8 +309,8 @@ function displayUserInfo() {
     }
 }
 
-// Toast notification function
-function showToast(message, type = 'info') {
+// Toast notification function (matches style.js signature)
+function showToast(type, message, duration = 4500) {
     // Create toast container if it doesn't exist
     let container = document.querySelector('.toast-container');
     if (!container) {
@@ -293,37 +321,75 @@ function showToast(message, type = 'info') {
     
     // Create toast element
     const toast = document.createElement('div');
-    toast.className = `toast ${type}`;
+    toast.className = `toast ${type || 'info'}`;
     toast.textContent = message;
     
     container.appendChild(toast);
     
-    // Remove toast after 4.5 seconds
+    // Remove toast with animation
     setTimeout(() => {
-        toast.remove();
-    }, 4500);
+        toast.style.animation = 'fadeOut 300ms ease forwards';
+        setTimeout(() => toast.remove(), 300);
+    }, duration);
 }
+
+// Listen for logout events from other tabs/windows
+window.addEventListener('storage', (event) => {
+    // Detect logout event from another tab
+    if (event.key === 'logout_event') {
+        console.log('Logout detected from another tab');
+        showToast('info', 'You have been logged out');
+        
+        // Redirect to home page after short delay
+        setTimeout(() => {
+            const currentPath = window.location.pathname;
+            if (currentPath.includes('/html/')) {
+                window.location.href = '../index.html';
+            } else {
+                window.location.href = 'index.html';
+            }
+        }, 1000);
+    }
+    
+    // Also detect if session_user was removed
+    if (event.key === 'session_user' && event.newValue === null) {
+        console.log('Session cleared from another tab');
+        const currentPage = window.location.pathname.split('/').pop();
+        
+        // Only redirect if not on public pages
+        const publicPages = ['index.html', 'login.html', 'register.html'];
+        if (!publicPages.includes(currentPage)) {
+            showToast('info', 'Session ended');
+            setTimeout(() => {
+                const currentPath = window.location.pathname;
+                if (currentPath.includes('/html/')) {
+                    window.location.href = '../index.html';
+                } else {
+                    window.location.href = 'index.html';
+                }
+            }, 1000);
+        }
+    }
+});
 
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', async () => {
-    // Check session on protected pages
-    const protectedPages = ['patient.html', 'staff.html', 'admin.html', 'profile.html', 'queues.html'];
+    console.log('=== AUTH.JS DOMContentLoaded ===');
     const currentPage = window.location.pathname.split('/').pop();
+    console.log('Current page:', currentPage);
     
-    if (protectedPages.includes(currentPage)) {
-        const user = await checkSession();
-        if (!user) {
-            window.location.href = '../html/login.html';
-            return;
-        } else {
-            localStorage.setItem('session_user', JSON.stringify(user));
-        }
-    }
-    
-    // Always display user info if logged in (on any page)
+    // Check session and store in localStorage
     const user = await checkSession();
+    console.log('Session check result:', user);
+    
     if (user) {
+        // Store user in localStorage for requireRole() to access
         localStorage.setItem('session_user', JSON.stringify(user));
-        displayUserInfo();
+        console.log('✓ User stored in localStorage');
+        
+        // Note: User info display is handled by style.js renderAuthNav()
+        // displayUserInfo(); // Disabled to prevent duplicate user info
+    } else {
+        console.log('✗ No active session');
     }
 });

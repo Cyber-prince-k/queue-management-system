@@ -42,6 +42,7 @@
       <div class="tabs" role="tablist" aria-label="Patient Actions">
         <button class="tab-btn active" data-tab="register-tab" role="tab" aria-selected="true" aria-controls="register-tab">Register</button>
         <button class="tab-btn" data-tab="queue-status-tab" role="tab" aria-selected="false" aria-controls="queue-status-tab">Queue Status</button>
+        <button class="tab-btn" data-tab="appointment-tab" role="tab" aria-selected="false" aria-controls="appointment-tab">Book Appointment</button>
       </div>
 
       <section id="register-tab" class="tab-content active" role="tabpanel" aria-labelledby="Register">
@@ -133,6 +134,115 @@
           <button type="submit" class="btn btn-primary">Check Status</button>
         </form>
         <div id="queue-status-result" class="queue-display hidden" aria-live="polite"></div>
+      </section>
+
+      <section id="appointment-tab" class="tab-content" role="tabpanel" aria-labelledby="Book Appointment">
+        <div class="info-banner" style="background: #f0fdf4; border-left: 4px solid #10b981; padding: 1rem; margin-bottom: 1.5rem; border-radius: 8px;">
+          <h3 style="margin-top: 0; color: #047857; font-size: 1.1rem;">📅 Book an Appointment</h3>
+          <p style="margin: 0.5rem 0; color: #065f46; line-height: 1.6;">
+            Schedule your visit in advance by booking an appointment. Choose your preferred date, time, and department.
+            You will receive an appointment confirmation number that you can use to check your appointment status.
+          </p>
+        </div>
+
+        <h3>Schedule Your Appointment</h3>
+        <form id="appointment-booking-form">
+          <div class="form-group">
+            <label for="appt-patient-name">Full Name <span style="color: #ef4444;">*</span></label>
+            <input type="text" id="appt-patient-name" name="appt-patient-name" placeholder="Enter your full name" required />
+          </div>
+          
+          <div class="form-group">
+            <label for="appt-patient-age">Age</label>
+            <input type="number" id="appt-patient-age" name="appt-patient-age" min="0" max="150" placeholder="Enter your age" />
+          </div>
+          
+          <div class="form-group">
+            <label for="appt-patient-phone">Phone Number <span style="color: #ef4444;">*</span></label>
+            <input type="tel" id="appt-patient-phone" name="appt-patient-phone" placeholder="e.g., +265 999 123 456" required />
+          </div>
+          
+          <div class="form-group">
+            <label for="appt-patient-id">ID Number</label>
+            <input type="text" id="appt-patient-id" name="appt-patient-id" placeholder="National ID or Passport Number" />
+          </div>
+          
+          <div class="form-group">
+            <label for="appt-patient-email">Email Address</label>
+            <input type="email" id="appt-patient-email" name="appt-patient-email" placeholder="your.email@example.com" />
+          </div>
+          
+          <div class="form-group">
+            <label for="appt-department">Department <span style="color: #ef4444;">*</span></label>
+            <select id="appt-department" name="appt-department" required>
+              <option value="">-- Select Department --</option>
+              <option value="opd">Outpatient Department (OPD)</option>
+              <option value="maternity">Maternity</option>
+              <option value="emergency">Emergency</option>
+              <option value="pediatrics">Pediatrics</option>
+            </select>
+          </div>
+          
+          <div class="form-group">
+            <label for="appt-date">Appointment Date <span style="color: #ef4444;">*</span></label>
+            <input type="date" id="appt-date" name="appt-date" required />
+            <small style="color: #64748b; display: block; margin-top: 0.25rem;">Select a date for your appointment</small>
+          </div>
+          
+          <div class="form-group">
+            <label for="appt-time">Preferred Time <span style="color: #ef4444;">*</span></label>
+            <select id="appt-time" name="appt-time" required>
+              <option value="">-- Select Time --</option>
+            </select>
+            <small style="color: #64748b; display: block; margin-top: 0.25rem;">Available time slots will appear after selecting date and department</small>
+          </div>
+          
+          <div class="form-group">
+            <label for="appt-service-type">Service Required</label>
+            <input type="text" id="appt-service-type" name="appt-service-type" placeholder="e.g., Consultation, Check-up, Follow-up" />
+          </div>
+          
+          <div class="form-group">
+            <label for="appt-reason">Reason for Visit</label>
+            <textarea id="appt-reason" name="appt-reason" rows="3" placeholder="Brief description of your medical concern (optional)"></textarea>
+          </div>
+          
+          <div class="form-group">
+            <label for="appt-priority">Priority Case</label>
+            <select id="appt-priority" name="appt-priority">
+              <option value="no">No Priority</option>
+              <option value="emergency">Emergency</option>
+              <option value="elderly">Elderly (65+)</option>
+              <option value="pregnant">Pregnant</option>
+              <option value="disability">Disability</option>
+            </select>
+            <small style="color: #64748b; display: block; margin-top: 0.25rem;">Select if you qualify for priority service</small>
+          </div>
+          
+          <div style="background: #fef3c7; border-left: 4px solid #f59e0b; padding: 1rem; margin: 1rem 0; border-radius: 8px;">
+            <p style="margin: 0; color: #92400e; font-size: 0.9rem;">
+              <strong>⚠️ Important:</strong> After booking, you will receive an appointment confirmation number. Please arrive 15 minutes before your scheduled time.
+            </p>
+          </div>
+          
+          <button type="submit" class="btn btn-primary" style="width: 100%; padding: 0.75rem; font-size: 1.1rem;">
+            📅 Book Appointment
+          </button>
+        </form>
+        
+        <div id="appointment-confirmation" style="margin-top: 1.5rem;"></div>
+        
+        <div style="margin-top: 2rem; padding-top: 2rem; border-top: 2px solid #e5e7eb;">
+          <h3>Check Appointment Status</h3>
+          <form id="appointment-status-form">
+            <div class="form-group">
+              <label for="appt-number">Appointment Number</label>
+              <input type="text" id="appt-number" name="appt-number" placeholder="Enter your appointment number" required />
+            </div>
+            <button type="submit" class="btn btn-secondary">Check Appointment</button>
+          </form>
+          <div id="appointment-status-result" style="margin-top: 1rem;"></div>
+        </div>
       </section>
     </section>
   </main>
@@ -312,7 +422,9 @@
         console.log('Copying token:', tokenNumber);
         if (navigator.clipboard && navigator.clipboard.writeText) {
             navigator.clipboard.writeText(tokenNumber).then(() => {
-                alert('✓ Token number copied to clipboard: ' + tokenNumber);
+                if (typeof showToast === 'function') {
+                    showToast('success', '✓ Token number copied to clipboard');
+                }
             }).catch(err => {
                 console.error('Failed to copy:', err);
                 fallbackCopy(tokenNumber);
@@ -332,14 +444,253 @@
         textArea.select();
         try {
             document.execCommand('copy');
-            alert('✓ Token number copied: ' + text);
+            if (typeof showToast === 'function') {
+                showToast('success', '✓ Token number copied');
+            }
         } catch (err) {
-            alert('Could not copy token number. Please write it down: ' + text);
+            if (typeof showToast === 'function') {
+                showToast('error', 'Could not copy. Please write it down: ' + text);
+            }
         }
         document.body.removeChild(textArea);
     }
     
     console.log('✓ Queue functions defined');
+    
+    // ===== APPOINTMENT FUNCTIONS =====
+    
+    // Create new appointment
+    async function createAppointment(appointmentData) {
+        try {
+            console.log('createAppointment called with:', appointmentData);
+            
+            const response = await fetch(`${API_BASE_URL}/appointments.php?action=create`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(appointmentData)
+            });
+
+            console.log('Response status:', response.status);
+
+            if (!response.ok) {
+                const txt = await response.text();
+                console.error('Server response:', txt);
+                try {
+                    const maybeJson = JSON.parse(txt);
+                    return { success: false, message: maybeJson.message || `HTTP ${response.status}` };
+                } catch (_) {
+                    return { success: false, message: `HTTP ${response.status}: ${txt.substring(0,200)}` };
+                }
+            }
+
+            const ct = response.headers.get('content-type') || '';
+            if (!ct.includes('application/json')) {
+                const txt = await response.text();
+                return { success: false, message: `Non-JSON response: ${txt.substring(0,200)}` };
+            }
+
+            const data = await response.json();
+            console.log('Response data:', data);
+
+            return data;
+        } catch (error) {
+            console.error('Create appointment error:', error);
+            return { success: false, message: error.message };
+        }
+    }
+    
+    // Get available time slots
+    async function getAvailableSlots(department, date) {
+        try {
+            const response = await fetch(`${API_BASE_URL}/appointments.php?action=available-slots&department=${department}&date=${date}&_=${Date.now()}`, {
+                method: 'GET'
+            });
+
+            if (!response.ok) {
+                const txt = await response.text();
+                return { success: false, message: `HTTP ${response.status}: ${txt.substring(0,120)}` };
+            }
+
+            const ct = response.headers.get('content-type') || '';
+            if (!ct.includes('application/json')) {
+                const txt = await response.text();
+                return { success: false, message: `Non-JSON response: ${txt.substring(0,120)}` };
+            }
+
+            const data = await response.json();
+            return data;
+        } catch (error) {
+            console.error('Get available slots error:', error);
+            return { success: false, message: error.message };
+        }
+    }
+    
+    // Get appointment by number
+    async function getAppointmentByNumber(appointmentNumber) {
+        try {
+            const response = await fetch(`${API_BASE_URL}/appointments.php?action=get&appointment_number=${appointmentNumber}`, {
+                method: 'GET'
+            });
+
+            if (!response.ok) {
+                const txt = await response.text();
+                return { success: false, message: `HTTP ${response.status}: ${txt.substring(0,120)}` };
+            }
+
+            const ct = response.headers.get('content-type') || '';
+            if (!ct.includes('application/json')) {
+                const txt = await response.text();
+                return { success: false, message: `Non-JSON response: ${txt.substring(0,120)}` };
+            }
+
+            const data = await response.json();
+            return data;
+        } catch (error) {
+            console.error('Get appointment error:', error);
+            return { success: false, message: error.message };
+        }
+    }
+    
+    // Display appointment confirmation
+    function displayAppointmentConfirmation(appointment) {
+        console.log('displayAppointmentConfirmation called with:', appointment);
+        const confirmationDiv = document.getElementById('appointment-confirmation');
+        if (!confirmationDiv) {
+            console.error('❌ appointment-confirmation element not found!');
+            return;
+        }
+        
+        const appointmentDate = new Date(appointment.appointment_date + ' ' + appointment.appointment_time);
+        const formattedDate = appointmentDate.toLocaleDateString('en-US', { 
+            weekday: 'long', 
+            year: 'numeric', 
+            month: 'long', 
+            day: 'numeric' 
+        });
+        const formattedTime = appointmentDate.toLocaleTimeString('en-US', { 
+            hour: '2-digit', 
+            minute: '2-digit' 
+        });
+        
+        confirmationDiv.innerHTML = `
+            <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); padding: 2rem; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); text-align: center; color: white;">
+                <div style="font-size: 3rem; margin-bottom: 1rem;">✅</div>
+                <h3 style="margin: 0 0 1rem 0; font-size: 1.5rem; font-weight: bold;">Appointment Booked Successfully!</h3>
+                
+                <div style="background: rgba(255,255,255,0.95); padding: 1.5rem; border-radius: 12px; margin: 1rem 0; color: #1e293b;">
+                    <p style="margin: 0 0 0.5rem 0; font-size: 0.9rem; color: #64748b; text-transform: uppercase; letter-spacing: 1px;">Your Appointment Number</p>
+                    <p style="font-size: 2.5rem; font-weight: bold; margin: 0; color: #10b981; font-family: monospace; letter-spacing: 2px;">
+                        ${appointment.appointment_number}
+                    </p>
+                </div>
+                
+                <div style="background: rgba(255,255,255,0.2); padding: 1rem; border-radius: 8px; margin: 1rem 0; text-align: left;">
+                    <p style="margin: 0.5rem 0; font-size: 1rem;">
+                        <strong>Patient:</strong> ${appointment.patient_name}
+                    </p>
+                    <p style="margin: 0.5rem 0; font-size: 1rem;">
+                        <strong>Department:</strong> ${appointment.department_name}
+                    </p>
+                    <p style="margin: 0.5rem 0; font-size: 1rem;">
+                        <strong>Date:</strong> ${formattedDate}
+                    </p>
+                    <p style="margin: 0.5rem 0; font-size: 1rem;">
+                        <strong>Time:</strong> ${formattedTime}
+                    </p>
+                </div>
+                
+                <div style="background: rgba(255,255,255,0.15); padding: 1rem; border-radius: 8px; margin-top: 1rem; border-left: 4px solid #fbbf24;">
+                    <p style="margin: 0; font-size: 0.95rem; line-height: 1.6;">
+                        ⚠️ <strong>Important:</strong> Please arrive 15 minutes before your scheduled time. Save your appointment number for reference.
+                    </p>
+                </div>
+                
+                <div style="margin-top: 1.5rem; display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+                    <button onclick="window.print()" type="button" class="btn" style="background: white; color: #10b981; padding: 0.75rem 1.5rem; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 1rem;">
+                        🖨️ Print Confirmation
+                    </button>
+                    <button onclick="copyAppointmentNumber('${appointment.appointment_number}')" type="button" class="btn" style="background: rgba(255,255,255,0.2); color: white; padding: 0.75rem 1.5rem; border: 2px solid white; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 1rem;">
+                        📋 Copy Number
+                    </button>
+                </div>
+            </div>
+        `;
+        
+        // Scroll to confirmation
+        setTimeout(() => {
+            confirmationDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }, 100);
+    }
+    
+    // Copy appointment number to clipboard
+    function copyAppointmentNumber(appointmentNumber) {
+        console.log('Copying appointment number:', appointmentNumber);
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(appointmentNumber).then(() => {
+                if (typeof showToast === 'function') {
+                    showToast('success', '✓ Appointment number copied to clipboard');
+                }
+            }).catch(err => {
+                console.error('Failed to copy:', err);
+                fallbackCopy(appointmentNumber);
+            });
+        } else {
+            fallbackCopy(appointmentNumber);
+        }
+    }
+    
+    // Load available time slots when date and department are selected
+    async function loadTimeSlots() {
+        const department = document.getElementById('appt-department').value;
+        const date = document.getElementById('appt-date').value;
+        const timeSelect = document.getElementById('appt-time');
+        
+        if (!department || !date) {
+            timeSelect.innerHTML = '<option value="">-- Select Time --</option>';
+            return;
+        }
+        
+        timeSelect.innerHTML = '<option value="">Loading...</option>';
+        
+        const result = await getAvailableSlots(department, date);
+        
+        if (result && result.success && Array.isArray(result.slots) && result.slots.length > 0) {
+            timeSelect.innerHTML = '<option value="">-- Select Time --</option>';
+            
+            result.slots.forEach(slot => {
+                const time = slot.time.substring(0, 5); // Remove seconds
+                const option = document.createElement('option');
+                option.value = slot.time;
+                option.textContent = `${time} ${slot.available ? '(Available)' : '(Fully Booked)'}`;
+                option.disabled = !slot.available;
+                timeSelect.appendChild(option);
+            });
+        } else {
+            // Graceful fallback: populate default half-hour slots 08:00 - 16:00
+            const defaults = [];
+            for (let h = 8; h < 16; h++) {
+                for (let m = 0; m < 60; m += 30) {
+                    const hh = String(h).padStart(2, '0');
+                    const mm = String(m).padStart(2, '0');
+                    defaults.push(`${hh}:${mm}:00`);
+                }
+            }
+            timeSelect.innerHTML = '<option value="">-- Select Time --</option>';
+            defaults.forEach(t => {
+                const opt = document.createElement('option');
+                opt.value = t;
+                opt.textContent = `${t.substring(0,5)} (Available)`;
+                timeSelect.appendChild(opt);
+            });
+            if (typeof showToast === 'function') {
+                showToast('info', 'Showing default time slots');
+            }
+        }
+    }
+    
+    console.log('✓ Appointment functions defined');
     
     // ===== FORM HANDLERS =====
     // Wait for DOM to be ready
@@ -404,9 +755,7 @@
           
           // Show success message
           if (typeof showToast === 'function') {
-            showToast('✓ Token created successfully!', 'success');
-          } else {
-            alert('✓ Token created successfully! Token: ' + result.token.token_number);
+            showToast('success', '✓ Token created successfully!');
           }
           
           // Clear form
@@ -426,9 +775,7 @@
           console.error('Token creation failed:', result);
           const errorMsg = result?.message || 'Failed to create token. Please try again.';
           if (typeof showToast === 'function') {
-            showToast(errorMsg, 'error');
-          } else {
-            alert(errorMsg);
+            showToast('error', errorMsg);
           }
         }
       } catch (error) {
@@ -440,9 +787,7 @@
         });
         const errorMsg = `An error occurred: ${error.message}. Please check the console for details.`;
         if (typeof showToast === 'function') {
-          showToast(errorMsg, 'error');
-        } else {
-          alert(errorMsg);
+          showToast('error', errorMsg);
         }
       } finally {
         // Always re-enable button
@@ -459,11 +804,11 @@
       const tokenNumber = document.getElementById('queue-token').value;
       
       if (!tokenNumber) {
-        showToast('Please enter a token number', 'error');
+        showToast('error', 'Please enter a token number');
         return;
       }
       
-      showToast('Checking status...', 'info');
+      showToast('info', 'Checking status...');
       
       // Get all tokens and find the matching one
       const allTokens = await getQueueStatus();
@@ -490,7 +835,7 @@
           </div>
         `;
         resultDiv.classList.remove('hidden');
-        showToast('Token found!', 'success');
+        showToast('success', 'Token found!');
       } else {
         resultDiv.innerHTML = `
           <div style="background: #fee; padding: 1.5rem; border-radius: 12px; border: 2px solid #ef4444;">
@@ -498,9 +843,187 @@
           </div>
         `;
         resultDiv.classList.remove('hidden');
-        showToast('Token not found', 'error');
+        showToast('error', 'Token not found');
       }
     });
+    
+    // ===== APPOINTMENT FORM HANDLERS =====
+    
+    // Set minimum date to today
+    const apptDateInput = document.getElementById('appt-date');
+    if (apptDateInput) {
+      const today = new Date().toISOString().split('T')[0];
+      apptDateInput.setAttribute('min', today);
+    }
+    
+    // Load time slots when department or date changes
+    const apptDepartment = document.getElementById('appt-department');
+    const apptDate = document.getElementById('appt-date');
+    
+    if (apptDepartment && apptDate) {
+      apptDepartment.addEventListener('change', loadTimeSlots);
+      apptDate.addEventListener('change', loadTimeSlots);
+      // Also trigger when appointment tab is opened, if both values already selected
+      const apptTabBtn = document.querySelector('.tab-btn[data-tab="appointment-tab"]');
+      if (apptTabBtn) {
+        apptTabBtn.addEventListener('click', () => {
+          if (apptDepartment.value && apptDate.value) {
+            loadTimeSlots();
+          }
+        });
+      }
+    }
+    
+    // Appointment booking form handler
+    const appointmentForm = document.getElementById('appointment-booking-form');
+    if (appointmentForm) {
+      appointmentForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        console.log('=== APPOINTMENT FORM SUBMITTED ===');
+        
+        const appointmentData = {
+          patient_name: document.getElementById('appt-patient-name').value,
+          patient_age: document.getElementById('appt-patient-age').value || null,
+          patient_phone: document.getElementById('appt-patient-phone').value,
+          patient_id_number: document.getElementById('appt-patient-id').value || null,
+          patient_email: document.getElementById('appt-patient-email').value || null,
+          department: document.getElementById('appt-department').value,
+          appointment_date: document.getElementById('appt-date').value,
+          appointment_time: document.getElementById('appt-time').value,
+          service_type: document.getElementById('appt-service-type').value || null,
+          reason: document.getElementById('appt-reason').value || null,
+          priority_type: document.getElementById('appt-priority').value || 'no'
+        };
+        
+        console.log('Appointment data:', appointmentData);
+        
+        // Auto-set priority for elderly
+        if (appointmentData.patient_age >= 65 && appointmentData.priority_type === 'no') {
+          appointmentData.priority_type = 'elderly';
+          console.log('Auto-set priority to elderly');
+        }
+        
+        const submitBtn = e.target.querySelector('button[type="submit"]');
+        submitBtn.disabled = true;
+        submitBtn.textContent = '⏳ Booking Appointment...';
+        
+        try {
+          console.log('Calling createAppointment...');
+          const result = await createAppointment(appointmentData);
+          console.log('Result from createAppointment:', result);
+          
+          if (result && result.success) {
+            console.log('Appointment created successfully:', result.appointment);
+            
+            // Show success message
+            if (typeof showToast === 'function') {
+              showToast('success', '✓ Appointment booked successfully!');
+            }
+            
+            // Display confirmation
+            displayAppointmentConfirmation(result.appointment);
+            
+            // Clear form
+            e.target.reset();
+            
+            // Reset time slots
+            document.getElementById('appt-time').innerHTML = '<option value="">-- Select Time --</option>';
+            
+          } else {
+            console.error('Appointment booking failed:', result);
+            const errorMsg = result?.message || 'Failed to book appointment. Please try again.';
+            if (typeof showToast === 'function') {
+              showToast('error', errorMsg);
+            }
+          }
+        } catch (error) {
+          console.error('Error submitting appointment form:', error);
+          const errorMsg = `An error occurred: ${error.message}. Please check the console for details.`;
+          if (typeof showToast === 'function') {
+            showToast('error', errorMsg);
+          }
+        } finally {
+          // Always re-enable button
+          console.log('Re-enabling submit button');
+          submitBtn.disabled = false;
+          submitBtn.textContent = '📅 Book Appointment';
+        }
+      });
+    }
+    
+    // Appointment status check form handler
+    const appointmentStatusForm = document.getElementById('appointment-status-form');
+    if (appointmentStatusForm) {
+      appointmentStatusForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const appointmentNumber = document.getElementById('appt-number').value;
+        
+        if (!appointmentNumber) {
+          if (typeof showToast === 'function') {
+            showToast('error', 'Please enter an appointment number');
+          }
+          return;
+        }
+        
+        if (typeof showToast === 'function') {
+          showToast('info', 'Checking appointment status...');
+        }
+        
+        const result = await getAppointmentByNumber(appointmentNumber);
+        const resultDiv = document.getElementById('appointment-status-result');
+        
+        if (result.success && result.appointment) {
+          const appt = result.appointment;
+          const appointmentDate = new Date(appt.appointment_date + ' ' + appt.appointment_time);
+          const formattedDate = appointmentDate.toLocaleDateString('en-US', { 
+            weekday: 'long', 
+            year: 'numeric', 
+            month: 'long', 
+            day: 'numeric' 
+          });
+          const formattedTime = appointmentDate.toLocaleTimeString('en-US', { 
+            hour: '2-digit', 
+            minute: '2-digit' 
+          });
+          
+          const statusColors = {
+            'pending': '#f59e0b',
+            'confirmed': '#10b981',
+            'completed': '#6b7280',
+            'cancelled': '#ef4444'
+          };
+          
+          resultDiv.innerHTML = `
+            <div style="background: #f0fdf4; padding: 1.5rem; border-radius: 12px; border: 2px solid #10b981;">
+              <h3 style="margin-top: 0; color: #047857;">Appointment Details</h3>
+              <p><strong>Appointment Number:</strong> ${appt.appointment_number}</p>
+              <p><strong>Patient Name:</strong> ${appt.patient_name}</p>
+              <p><strong>Department:</strong> ${appt.department_name}</p>
+              <p><strong>Date:</strong> ${formattedDate}</p>
+              <p><strong>Time:</strong> ${formattedTime}</p>
+              <p><strong>Status:</strong> <span style="color: ${statusColors[appt.status]}; font-weight: bold; text-transform: uppercase;">${appt.status}</span></p>
+              ${appt.service_type ? `<p><strong>Service:</strong> ${appt.service_type}</p>` : ''}
+              ${appt.priority_type !== 'no' ? `<p><strong>Priority:</strong> ${appt.priority_type}</p>` : ''}
+            </div>
+          `;
+          
+          if (typeof showToast === 'function') {
+            showToast('success', 'Appointment found!');
+          }
+        } else {
+          resultDiv.innerHTML = `
+            <div style="background: #fee2e2; padding: 1.5rem; border-radius: 12px; border: 2px solid #ef4444;">
+              <p style="color: #ef4444; margin: 0;">Appointment not found. Please check the number and try again.</p>
+            </div>
+          `;
+          
+          if (typeof showToast === 'function') {
+            showToast('error', 'Appointment not found');
+          }
+        }
+      });
+    }
     
     }); // End window.addEventListener('load')
   </script>

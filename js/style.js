@@ -83,7 +83,13 @@ function getSessionUser() {
         return null;
     }
 }
-function clearSession() { localStorage.removeItem('session_user'); }
+function clearSession() { 
+    localStorage.removeItem('session_user');
+    
+    // Broadcast logout event to all tabs
+    localStorage.setItem('logout_event', Date.now().toString());
+    localStorage.removeItem('logout_event');
+}
 
 function roleToDashboard(role) {
     if (role === 'admin') return resolvePath('admin.html');
@@ -97,9 +103,9 @@ function guardRoleProtectedPages() {
     // Define which roles can access which pages
     const pageRoles = {
         'admin.html': ['admin'],                      // Only admin
-        'staff.html': ['staff', 'admin'],             // Staff or admin
+        'staff.html': ['staff', 'admin'],             // Staff or admin  
+        'patient.html': ['patient', 'admin'],         // Patient or admin (requires login now)
         'profile.html': ['patient', 'staff', 'admin'] // Any logged-in user
-        // patient.html is public - no restriction
     };
     
     if (pageRoles[page]) {
@@ -108,7 +114,9 @@ function guardRoleProtectedPages() {
         // Check if user is logged in
         if (!user) {
             showToast('error', 'Please login to access this page.');
-            location.href = resolvePath('login.html');
+            setTimeout(() => {
+                location.href = resolvePath('login.html');
+            }, 1500);
             return;
         }
         
@@ -118,7 +126,7 @@ function guardRoleProtectedPages() {
             // Redirect to their appropriate dashboard
             setTimeout(() => {
                 location.href = roleToDashboard(user.role);
-            }, 1500);
+            }, 2000);
         }
     }
 }
@@ -142,10 +150,15 @@ function renderAuthNav() {
             <button type="button" class="btn btn-warning" id="logout-btn" style="margin-left:.5rem;">Logout</button>
         `;
         const btn = slot.querySelector('#logout-btn');
-        btn.addEventListener('click', () => {
-            clearSession();
-            showToast('info', 'Logged out');
-            setTimeout(() => location.href = resolvePath('index.html'), 300);
+        btn.addEventListener('click', async () => {
+            // Use auth.js logout function if available, otherwise fallback to clearSession
+            if (typeof logout === 'function') {
+                await logout();
+            } else {
+                clearSession();
+                showToast('success', 'Logged out');
+                setTimeout(() => location.href = resolvePath('index.html'), 500);
+            }
         });
     } else {
         slot.innerHTML = `
@@ -314,14 +327,87 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Staff page: Uses refreshQueueDisplay() with auto-refresh
     // Admin page: Should implement real database statistics queries
 
-    // Initialize auth flows and guards, and render auth-aware nav
-    initAuthFlows();
-    guardRoleProtectedPages();
-    renderAuthNav();
+    // Initialize auth flows and guards, and render auth-aware nav (guarded)
+    if (typeof initAuthFlows === 'function') initAuthFlows();
+    if (typeof guardRoleProtectedPages === 'function') guardRoleProtectedPages();
+    if (typeof renderAuthNav === 'function') renderAuthNav();
 
-    // Initialize toast container and confirm modal
-    initUIEnhancements();
+    // Initialize toast container and confirm modal (guarded)
+    if (typeof initUIEnhancements === 'function') initUIEnhancements();
+
+    // If on admin page, bind handlers and load stats
+    const isAdminPage = (location.pathname.split('/').pop() || 'index.html') === 'admin.html';
+    if (isAdminPage) {
+        // Bind buttons
+        const dailyReportBtn = document.getElementById('daily-report-btn');
+        if (dailyReportBtn) dailyReportBtn.addEventListener('click', () => generateReport('daily'));
+
+        const weeklyReportBtn = document.getElementById('weekly-report-btn');
+        if (weeklyReportBtn) weeklyReportBtn.addEventListener('click', () => generateReport('weekly'));
+
+        const filteredReportBtn = document.getElementById('filtered-report-btn');
+        if (filteredReportBtn) filteredReportBtn.addEventListener('click', () => generateFilteredReport());
+
+        const exportPdfBtn = document.getElementById('export-pdf-btn');
+        if (exportPdfBtn) exportPdfBtn.addEventListener('click', () => exportReportPDF());
+
+        // System management handlers
+        const resetBtn = document.getElementById('reset-queues-btn');
+        if (resetBtn) resetBtn.addEventListener('click', async () => {
+            try {
+                const ok = confirm('This will cancel all waiting/serving tokens. Continue?');
+                if (!ok) return;
+                const base = getPhpApiBase();
+                const res = await fetch(`${base}/admin.php?action=reset_queues`, {
+                    method: 'POST',
+                    credentials: 'include'
+                });
+                const data = await res.json().catch(() => ({ success: false }));
+                if (!res.ok || !data.success) throw new Error(data.message || 'Reset failed');
+                if (typeof showToast === 'function') showToast('success', `Queues reset. Cancelled: ${data.cancelled ?? 0}`);
+                loadAdminStats();
+            } catch (e) {
+                console.error('[ADMIN] reset_queues error', e);
+                if (typeof showToast === 'function') showToast('error', 'Failed to reset queues');
+            }
+        });
+
+        const backupBtn = document.getElementById('backup-data-btn');
+        if (backupBtn) backupBtn.addEventListener('click', () => {
+            try {
+                const base = getPhpApiBase();
+                const url = `${base}/admin.php?action=backup`;
+                window.open(url, '_blank');
+            } catch (e) {
+                console.error('[ADMIN] backup error', e);
+                if (typeof showToast === 'function') showToast('error', 'Failed to start backup');
+            }
+        });
+
+        // Load stats
+        loadAdminStats();
+    }
 });
+
+// If DOM already loaded (e.g., script injected late), initialize admin bindings immediately
+if (document.readyState !== 'loading') {
+    try {
+        const isAdminPage = (location.pathname.split('/').pop() || 'index.html') === 'admin.html';
+        if (isAdminPage) {
+            const dailyReportBtn = document.getElementById('daily-report-btn');
+            if (dailyReportBtn) dailyReportBtn.onclick = () => generateReport('daily');
+            const weeklyReportBtn = document.getElementById('weekly-report-btn');
+            if (weeklyReportBtn) weeklyReportBtn.onclick = () => generateReport('weekly');
+            const filteredReportBtn = document.getElementById('filtered-report-btn');
+            if (filteredReportBtn) filteredReportBtn.onclick = () => generateFilteredReport();
+            const exportCsvBtn = document.getElementById('export-csv-btn');
+            if (exportCsvBtn) exportCsvBtn.onclick = () => exportReportCSV();
+            loadAdminStats();
+        }
+    } catch (e) {
+        console.warn('[ADMIN] Late init failed', e);
+    }
+}
 
 // ===== UI Enhancements: Toasts and Confirm Modal =====
 let toastContainerEl = null;
@@ -348,7 +434,10 @@ function initUIEnhancements() {
 }
 
 function showToast(type, message, duration = 4500) {
-    if (!toastContainerEl) return alert(message);
+    if (!toastContainerEl) {
+        console.warn('[Toast] Container not found:', message);
+        return;
+    }
     const el = document.createElement('div');
     el.className = `toast ${type || 'info'}`;
     el.textContent = message;
@@ -362,7 +451,10 @@ function showToast(type, message, duration = 4500) {
 }
 
 function showConfirm(message, { confirmText = 'Confirm', cancelText = 'Cancel' } = {}) {
-    if (!confirmBackdropEl) return Promise.resolve(confirm(message));
+    if (!confirmBackdropEl) {
+        console.warn('[Confirm] Backdrop not found:', message);
+        return Promise.resolve(false);
+    }
     return new Promise(resolve => {
         confirmBackdropEl.classList.add('show');
         const msg = confirmBackdropEl.querySelector('#confirm-message');
@@ -555,6 +647,20 @@ if (weeklyReportBtn) {
     });
 }
 
+const filteredReportBtn = document.getElementById('filtered-report-btn');
+if (filteredReportBtn) {
+    filteredReportBtn.addEventListener('click', () => {
+        generateFilteredReport();
+    });
+}
+
+const exportCsvBtn = document.getElementById('export-csv-btn');
+if (exportCsvBtn) {
+    exportCsvBtn.addEventListener('click', () => {
+        exportReportCSV();
+    });
+}
+
 // Admin reset queues - HANDLED BY admin.html inline script
 // Uses real API functions from queue.js
 // DO NOT add duplicate handlers here
@@ -585,8 +691,187 @@ function showSection(section) {
 // These functions used mock data. Now using real database data from queue.js
 // The updatePublicDisplay() function in queue.js handles public display updates
 
-// REMOVED: generateReport() - Used mock data
-// Admin reports should query real database statistics
+// Admin statistics and reports (PHP backend)
+function getPhpApiBase() {
+    if (typeof API_BASE_URL !== 'undefined' && API_BASE_URL) return API_BASE_URL;
+    // Fallback relative to site root
+    return window.location.origin + '/queue%20system/php/api';
+}
+
+async function loadAdminStats() {
+    try {
+        const base = getPhpApiBase();
+        console.log('[ADMIN] Loading stats from', `${base}/admin.php?action=stats`);
+        const res = await fetch(`${base}/admin.php?action=stats`, { credentials: 'include' });
+        if (!res.ok) {
+            const t = await res.text();
+            console.error('[ADMIN] Stats HTTP error', res.status, t);
+            throw new Error(`Failed to load stats (${res.status})`);
+        }
+        const data = await res.json();
+        console.log('[ADMIN] Stats data', data);
+        const totalEl = document.getElementById('total-patients');
+        const avgEl = document.getElementById('avg-wait-time');
+        const waitingEl = document.getElementById('currently-waiting');
+        if (totalEl) totalEl.textContent = data.total_patients_today ?? 0;
+        if (avgEl) avgEl.textContent = (data.avg_wait_time_minutes ?? 0) + ' min';
+        if (waitingEl) waitingEl.textContent = data.currently_waiting ?? 0;
+    } catch (e) {
+        console.error('[ADMIN] loadAdminStats error', e);
+        if (typeof showToast === 'function') showToast('error', 'Failed to load admin stats');
+    }
+}
+
+async function generateReport(period = 'daily') {
+    try {
+        const base = getPhpApiBase();
+        const url = `${base}/admin.php?action=report&period=${encodeURIComponent(period)}`;
+        console.log('[ADMIN] Generating report', url);
+        const res = await fetch(url, { credentials: 'include' });
+        if (!res.ok) {
+            const t = await res.text();
+            console.error('[ADMIN] Report HTTP error', res.status, t);
+            throw new Error('Failed to generate report');
+        }
+        const data = await res.json();
+        console.log('[ADMIN] Report data', data);
+        const out = document.getElementById('report-output');
+        if (!out) return;
+        const byDept = (data.by_department || []).map(d => `${d.name} (${d.code}): ${d.total}`).join(', ');
+        const peak = (data.peak_hours || []).map(h => `${h.hour} (${h.c})`).join(', ');
+        out.classList.remove('hidden');
+        const rows = Array.isArray(data.rows) ? data.rows : [];
+        const table = rows.length ? `
+            <div style="overflow:auto; margin-top: .75rem;">
+              <table class="table" style="width:100%; border-collapse: collapse;">
+                <thead>
+                  <tr>
+                    <th>Token</th><th>Patient</th><th>Phone</th><th>Department</th><th>Priority</th><th>Status</th><th>Created</th><th>Called</th><th>Completed</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${rows.map(r => `
+                    <tr>
+                      <td>${r.token_number || ''}</td>
+                      <td>${r.patient_name || ''}</td>
+                      <td>${r.patient_phone || ''}</td>
+                      <td>${r.department || ''}</td>
+                      <td>${r.priority_type || ''}</td>
+                      <td>${r.status || ''}</td>
+                      <td>${r.created_at || ''}</td>
+                      <td>${r.called_at || ''}</td>
+                      <td>${r.completed_at || ''}</td>
+                    </tr>`).join('')}
+                </tbody>
+              </table>
+            </div>
+        ` : '';
+        out.innerHTML = `
+            <div class="card">
+                <h4 style="margin-top:0">${period === 'weekly' ? 'Weekly' : 'Daily'} Report</h4>
+                <p><strong>Patients served:</strong> ${data.patients_served ?? 0}</p>
+                <p><strong>Average wait time:</strong> ${(data.avg_wait_time_minutes ?? 0)} min</p>
+                <p><strong>Busiest departments:</strong> ${byDept || '-'}</p>
+                <p><strong>Peak hours:</strong> ${peak || '-'}</p>
+                ${table}
+            </div>
+        `;
+    } catch (e) {
+        console.error('[ADMIN] generateReport error', e);
+        if (typeof showToast === 'function') showToast('error', 'Failed to generate report');
+    }
+}
+
+async function generateFilteredReport() {
+    const start = document.getElementById('report-start')?.value || '';
+    const end = document.getElementById('report-end')?.value || '';
+    const dept = document.getElementById('report-dept')?.value || '';
+    try {
+        const base = getPhpApiBase();
+        const params = new URLSearchParams({ action: 'report' });
+        if (start) params.append('start_date', start);
+        if (end) params.append('end_date', end);
+        if (dept) params.append('department', dept);
+        const res = await fetch(`${base}/admin.php?${params.toString()}`, { credentials: 'include' });
+        if (!res.ok) throw new Error('Failed');
+        const data = await res.json();
+        const out = document.getElementById('report-output');
+        if (!out) return;
+        const byDept = (data.by_department || []).map(d => `${d.name} (${d.code}): ${d.total}`).join(', ');
+        const rows = Array.isArray(data.rows) ? data.rows : [];
+        const table = rows.length ? `
+            <div style="overflow:auto; margin-top: .75rem;">
+              <table class="table" style="width:100%; border-collapse: collapse;">
+                <thead>
+                  <tr>
+                    <th>Token</th><th>Patient</th><th>Phone</th><th>Department</th><th>Priority</th><th>Status</th><th>Created</th><th>Called</th><th>Completed</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${rows.map(r => `
+                    <tr>
+                      <td>${r.token_number || ''}</td>
+                      <td>${r.patient_name || ''}</td>
+                      <td>${r.patient_phone || ''}</td>
+                      <td>${r.department || ''}</td>
+                      <td>${r.priority_type || ''}</td>
+                      <td>${r.status || ''}</td>
+                      <td>${r.created_at || ''}</td>
+                      <td>${r.called_at || ''}</td>
+                      <td>${r.completed_at || ''}</td>
+                    </tr>`).join('')}
+                </tbody>
+              </table>
+            </div>
+        ` : '';
+        out.classList.remove('hidden');
+        out.innerHTML = `
+            <div class="card">
+                <h4 style="margin-top:0">Filtered Report ${start ? `(${start}${end ? ' to ' + end : ''})` : ''} ${dept ? `- ${dept.toUpperCase()}` : ''}</h4>
+                <p><strong>Patients served:</strong> ${data.patients_served ?? 0}</p>
+                <p><strong>Average wait time:</strong> ${(data.avg_wait_time_minutes ?? 0)} min</p>
+                <p><strong>Busiest departments:</strong> ${byDept || '-'}</p>
+                ${table}
+            </div>
+        `;
+    } catch {
+        showToast('error', 'Failed to run filtered report');
+    }
+}
+
+function exportReportPDF() {
+    const start = document.getElementById('report-start')?.value || '';
+    const end = document.getElementById('report-end')?.value || '';
+    const dept = document.getElementById('report-dept')?.value || '';
+    const base = getPhpApiBase();
+    const params = new URLSearchParams({ action: 'report_pdf_download' });
+    if (start) params.append('start_date', start);
+    if (end) params.append('end_date', end);
+    if (dept) params.append('department', dept);
+    const url = `${base}/admin.php?${params.toString()}`;
+    // Try direct download via blob to avoid popup blockers
+    fetch(url, { credentials: 'include' })
+      .then(async (res) => {
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const ct = res.headers.get('Content-Type') || '';
+        if (!ct.includes('application/pdf')) throw new Error('Not PDF');
+        const blob = await res.blob();
+        const filename = (res.headers.get('Content-Disposition') || '').match(/filename=([^;]+)/)?.[1]?.replace(/^\"|\"$/g, '') || `queue_report_${Date.now()}.pdf`;
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        setTimeout(() => {
+          URL.revokeObjectURL(link.href);
+          link.remove();
+        }, 1000);
+      })
+      .catch(() => {
+        // Fallback to opening in a new tab (browser may still prompt download)
+        window.open(url, '_blank');
+      });
+}
 
 // Helper function for department names
 function getDepartmentName(code) {
@@ -604,3 +889,32 @@ function getDepartmentName(code) {
 
 // REMOVED: updatePublicDisplay() initialization
 // Public display now uses real-time data from queue.js
+
+// Listen for logout events from other tabs/windows
+window.addEventListener('storage', (event) => {
+    // Detect logout event from another tab
+    if (event.key === 'logout_event') {
+        console.log('Logout detected from another tab (style.js)');
+        showToast('info', 'You have been logged out');
+        
+        // Redirect to home page after short delay
+        setTimeout(() => {
+            location.href = resolvePath('index.html');
+        }, 1000);
+    }
+    
+    // Also detect if session_user was removed
+    if (event.key === 'session_user' && event.newValue === null) {
+        console.log('Session cleared from another tab (style.js)');
+        const currentPage = location.pathname.split('/').pop() || 'index.html';
+        
+        // Only redirect if not on public pages
+        const publicPages = ['index.html', 'login.html', 'register.html'];
+        if (!publicPages.includes(currentPage)) {
+            showToast('info', 'Session ended');
+            setTimeout(() => {
+                location.href = resolvePath('index.html');
+            }, 1000);
+        }
+    }
+});

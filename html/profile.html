@@ -90,8 +90,15 @@
   <script src="../js/auth.js"></script>
   <script src="../js/style.js"></script>
   <script>
-    // Require login for profile page
-    requireRole(['patient', 'staff', 'admin']);
+    // Wait for page to fully load before checking role
+    window.addEventListener('load', function() {
+      console.log('=== PROFILE.HTML LOADED ===');
+      // Require login for profile page
+      const hasAccess = requireRole(['patient', 'staff', 'admin']);
+      if (!hasAccess) {
+        console.error('Access denied, requireRole returned false');
+      }
+    });
   </script>
 </body>
 </html>

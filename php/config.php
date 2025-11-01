@@ -1,5 +1,38 @@
 <?php
 // Database configuration for XAMPP
+// Prevent HTML error output from breaking JSON responses
+ini_set('display_errors', 0);
+ini_set('display_startup_errors', 0);
+ini_set('html_errors', 0);
+error_reporting(E_ALL);
+
+// Global JSON error handler to avoid HTML error pages
+set_error_handler(function ($severity, $message, $file, $line) {
+    // Respect @ operator
+    if (!(error_reporting() & $severity)) {
+        return false;
+    }
+    http_response_code(500);
+    header('Content-Type: application/json');
+    echo json_encode(['success' => false, 'message' => $message, 'file' => $file, 'line' => $line]);
+    exit;
+});
+
+set_exception_handler(function ($e) {
+    http_response_code(500);
+    header('Content-Type: application/json');
+    echo json_encode(['success' => false, 'message' => $e->getMessage(), 'file' => $e->getFile(), 'line' => $e->getLine()]);
+    exit;
+});
+
+register_shutdown_function(function () {
+    $err = error_get_last();
+    if ($err && in_array($err['type'], [E_ERROR, E_PARSE, E_CORE_ERROR, E_COMPILE_ERROR])) {
+        http_response_code(500);
+        header('Content-Type: application/json');
+        echo json_encode(['success' => false, 'message' => $err['message'], 'file' => $err['file'], 'line' => $err['line']]);
+    }
+});
 define('DB_HOST', 'localhost');
 define('DB_USER', 'root');
 define('DB_PASS', '');
