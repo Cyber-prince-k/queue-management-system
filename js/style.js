@@ -1,4 +1,4 @@
-// Digital Queue Management System JavaScript
+// Queue Management System JavaScript
 
 // ===== Path Resolution Helper =====
 // Resolves page paths based on current location (root vs html/ folder)
@@ -23,7 +23,7 @@ function resolvePath(page) {
 const translations = {
     en: {
         hospital_name: 'Queen Elizabeth Central Hospital',
-        system_name: 'Digital Queue Management System',
+        system_name: 'Queue Management System',
         nav_home: 'Home',
         nav_patient: 'Patient',
         nav_staff: 'Staff',
@@ -38,11 +38,18 @@ const translations = {
         admin_access: 'Admin Access',
         admin_access_desc: 'System administration and reports',
         public_display_title: 'Current Queue Status',
+        label_currently_serving: 'Currently Serving:',
+        label_next: 'Next:',
+        welcome_title: 'Welcome to QECH Queue Management System',
+        welcome_desc: 'Streamline patient flow across departments and reduce waiting times. Please login or create an account to access your dashboard. Public display shows live tokens being served.',
+        btn_login: 'Login',
+        btn_create_account: 'Create Account',
+        btn_view_public: 'View Public Display',
         dept_opd: 'Outpatient Department (OPD)',
         dept_maternity: 'Maternity',
         dept_emergency: 'Emergency',
         dept_pediatrics: 'Pediatrics',
-        footer_line1: '© 2023 Queen Elizabeth Central Hospital - Digital Queue Management System',
+        footer_line1: '© 2023 Queen Elizabeth Central Hospital - Queue Management System',
         footer_line2: '',
     },
     ny: {
@@ -62,6 +69,13 @@ const translations = {
         admin_access: 'Khomo la Oyendetsa',
         admin_access_desc: 'Kasamalidwe ka dongosolo ndi malipoti',
         public_display_title: 'Zomwe zikuchitika pa Mizere',
+        label_currently_serving: 'Akugwiritsidwa Ntchito Pano:',
+        label_next: 'Wotsatira:',
+        welcome_title: 'Takulandirani ku QECH Dongosolo la Mizere',
+        welcome_desc: 'Konzekeretsani kuyenda kwa odwala m’zipatala ndikuchepetsa nthawi yoyembekezera. Chonde lolani kapena pangani akaunti kuti mulowe. Chiwonetsero pagulu chimasonyeza ma token omwe akugwiritsidwa ntchito.',
+        btn_login: 'Loweani',
+        btn_create_account: 'Pangani Akaunti',
+        btn_view_public: 'Onani Chiwonetsero Pagulu',
         dept_opd: 'Chipatala cha OPD',
         dept_maternity: 'Maternity',
         dept_emergency: 'Emergency',
@@ -293,6 +307,11 @@ function applyTranslations() {
         const key = el.getAttribute('data-i18n');
         if (dict[key]) {
             el.textContent = dict[key];
+        }
+        // Optional: translate specific attribute when provided
+        const attr = el.getAttribute('data-i18n-attr');
+        if (attr && dict[key]) {
+            el.setAttribute(attr, dict[key]);
         }
     });
     const languageSelect = document.getElementById('language-select');

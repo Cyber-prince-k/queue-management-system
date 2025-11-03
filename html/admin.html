@@ -14,7 +14,7 @@
           <img src="../images/Screenshot 2025-11-01 111731.png" alt="QECH Logo" class="logo" />
           <div>
             <h1 data-i18n="hospital_name">Queen Elizabeth Central Hospital</h1>
-            <h2 data-i18n="system_name">Digital Queue Management System</h2>
+            <h2 data-i18n="system_name">Queue Management System</h2>
           </div>
         </div>
       </div>
@@ -115,7 +115,7 @@
         </div>
       </div>
       <div class="footer-bottom">
-        <p data-i18n="footer_line1">&copy; 2023 Queen Elizabeth Central Hospital - Digital Queue Management System</p>
+        <p data-i18n="footer_line1">&copy; 2023 Queen Elizabeth Central Hospital - Queue Management System</p>
         
       </div>
     </div>
@@ -123,7 +123,14 @@
 
   <script>
     if (typeof API_BASE_URL === 'undefined') {
-      var API_BASE_URL = 'http://localhost/queue%20system/php/api';
+      (function(){
+        var origin = window.location.origin;
+        var base = '/queue%20system/php/api';
+        if (!window.location.pathname.includes('/queue%20system/')) {
+          base = '/php/api';
+        }
+        window.API_BASE_URL = origin + base;
+      })();
     }
   </script>
   <script src="../js/auth.js"></script>

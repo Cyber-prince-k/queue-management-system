@@ -1,7 +1,7 @@
 # Queue Token System Documentation
 
 ## Overview
-The Digital Queue Management System automatically generates a **unique token number** for each patient when they submit the registration form. This token serves as their position identifier in the queue.
+The Queue Management System automatically generates a **unique token number** for each patient when they submit the registration form. This token serves as their position identifier in the queue.
 
 ---
 

@@ -2,7 +2,7 @@
 
 ## 📋 Project Overview
 
-**Project Name:** Digital Queue Management System for Queen Elizabeth Central Hospital (QECH)  
+**Project Name:** Queue Management System for Queen Elizabeth Central Hospital (QECH)  
 **Developer:** Prince Adams Kamanga  
 **Institution:** NACIT Advanced Diploma in Computing  
 **Technology Stack:** HTML5, CSS3, JavaScript, PHP, MySQL  

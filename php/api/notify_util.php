@@ -62,25 +62,57 @@ function smtp_send($host, $port, $username, $password, $fromEmail, $fromName, $t
     // DATA
     $write('DATA'.$crlf); $dataResp = $read(); if ($debug) { $log('S: '.trim($dataResp)); }
     if (substr($dataResp,0,3) !== '354') { fclose($fp); $log('DATA rejected: '.$dataResp); return ['success'=>false,'message'=>'DATA rejected: '.$dataResp]; }
+    // Send a single HTML part with base64 encoding (simple and reliable)
+    $dateHdr = date('r');
+    $msgId = sprintf('<%s@qech.local>', bin2hex(random_bytes(8)));
+
     $headers = [];
+    $headers[] = 'Date: '.$dateHdr;
+    $headers[] = 'Message-ID: '.$msgId;
     $headers[] = 'From: '.sprintf('%s <%s>', $fromName, $fromEmail);
     $headers[] = 'To: <'.$toEmail.'>';
     $headers[] = 'Subject: '.$subject;
     $headers[] = 'MIME-Version: 1.0';
     $headers[] = 'Content-Type: text/plain; charset=UTF-8';
-    $headers[] = 'Content-Transfer-Encoding: 8bit';
-    $msg = implode($crlf, $headers).$crlf.$crlf.$body.$crlf.
-           '.'; // end of DATA marker is a single dot on its own line
+    $headers[] = 'Content-Transfer-Encoding: quoted-printable';
+    $headers[] = 'X-Mailer: QECH-Queue-System';
+
+    $encodedBody = function_exists('quoted_printable_encode') ? quoted_printable_encode($body) : $body;
+
+    $data = implode($crlf, $headers).$crlf.$crlf.$encodedBody.$crlf.
+            '.'; // end of DATA marker is a single dot on its own line
     // Ensure CRLF and end marker
-    $msg = str_replace(["\r\n","\r","\n"], $crlf, $msg);
-    if (substr($msg,-1) !== "\n") $msg .= $crlf;
-    $write($msg.$crlf);
+    $data = str_replace(["\r\n","\r","\n"], $crlf, $data);
+    if (substr($data,-1) !== "\n") $data .= $crlf;
+    $write($data.$crlf);
     $dataOk = $read(); if ($debug) { $log('S: '.trim($dataOk)); }
     if (substr($dataOk,0,3) !== '250') { fclose($fp); $log('Message not accepted: '.$dataOk); return ['success'=>false,'message'=>'Message not accepted: '.$dataOk]; }
 
     // QUIT
     $write('QUIT'.$crlf); $quit = $read(); if ($debug) { $log('S: '.trim($quit)); } fclose($fp);
     return ['success'=>true];
+}
+
+function build_email_html($subject, $message, $brandName) {
+    $safeSubject = htmlspecialchars($subject, ENT_QUOTES, 'UTF-8');
+    $safeBody = nl2br(htmlspecialchars($message, ENT_QUOTES, 'UTF-8'));
+    return '<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"></head><body style="background:#f3f4f6;margin:0;padding:0;font-family:Segoe UI,Arial,sans-serif;color:#0f172a;">'
+        .'<table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="background:#f3f4f6;padding:24px 0;">'
+        .'<tr><td align="center">'
+        .'<table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="max-width:640px;background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,0.08);">'
+        .'<tr><td style="background:linear-gradient(135deg,#1d4ed8,#7c3aed);padding:20px 24px;color:#fff;">'
+        .'<div style="font-size:18px;font-weight:700;">'.$brandName.'</div>'
+        .'<div style="opacity:.9;margin-top:4px;font-size:14px;">Queue Management System</div>'
+        .'</td></tr>'
+        .'<tr><td style="padding:24px;">'
+        .'<h1 style="margin:0 0 12px 0;font-size:20px;color:#111827;">'.$safeSubject.'</h1>'
+        .'<div style="font-size:15px;line-height:1.6;color:#374151;">'.$safeBody.'</div>'
+        .'</td></tr>'
+        .'<tr><td style="padding:16px 24px;background:#f9fafb;font-size:12px;color:#6b7280;">'
+        .'This email was sent by '.$brandName.'.</td></tr>'
+        .'</table>'
+        .'</td></tr></table>'
+        .'</body></html>';
 }
 
 function send_email_notification($to, $subject, $message) {
@@ -91,7 +123,7 @@ function send_email_notification($to, $subject, $message) {
         return [ 'success' => false, 'message' => 'Invalid email address' ];
     }
 
-    $host = env_or_default('SMTP_HOST');
+    $host = env_or_default('SMTP_HOST', 'smtp.gmail.com');
     $port = (int)env_or_default('SMTP_PORT', 587);
     // Read from env; fall back to provided values ONLY if env not set
     $user = env_or_default('SMTP_USER', 'princekamnga1@gmail.com');
@@ -106,10 +138,10 @@ function send_email_notification($to, $subject, $message) {
         $from = $user;
     }
 
+    $plainMessage = $message;
     if ($host && $user && $pass) {
         try {
-            // Dot-stuff lines starting with '.' in body
-            $safeBody = preg_replace('/\n\./', "\n..", $message);
+            $safeBody = preg_replace('/\n\./', "\n..", $plainMessage);
             $res = smtp_send($host, $port, $user, $pass, $from, $fromName, $to, $subject, $safeBody, $secure, 25);
             if (!$res['success']) return $res;
             return ['success' => true];
@@ -118,12 +150,14 @@ function send_email_notification($to, $subject, $message) {
         }
     }
 
-    // Fallback to mail()
+    // Fallback to mail(): plain text
     $headers = [];
     $headers[] = 'From: ' . sprintf('%s <%s>', $fromName, $from);
     $headers[] = 'MIME-Version: 1.0';
     $headers[] = 'Content-Type: text/plain; charset=UTF-8';
-    $ok = @mail($to, $subject, $message, implode("\r\n", $headers));
+    $headers[] = 'Content-Transfer-Encoding: 8bit';
+    $headers[] = 'X-Mailer: QECH-Queue-System';
+    $ok = @mail($to, $subject, $plainMessage, implode("\r\n", $headers));
     if (!$ok) return [ 'success' => false, 'message' => 'mail() returned false (configure SMTP env vars)' ];
     return [ 'success' => true ];
 }

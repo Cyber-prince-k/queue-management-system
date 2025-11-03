@@ -1,8 +1,56 @@
 // Queue Management JavaScript for QECH Queue System
 // Define API_BASE_URL only if not already defined
 if (typeof API_BASE_URL === 'undefined') {
-    var API_BASE_URL = 'http://localhost/queue%20system/php/api';
+    (function(){
+        var origin = window.location.origin;
+        var base = '/queue%20system/php/api';
+        // Fallback: if path doesn't include "queue%20system", try relative php/api
+        if (!window.location.pathname.includes('/queue%20system/')) {
+            base = '/php/api';
+        }
+        window.API_BASE_URL = origin + base;
+    })();
 }
+
+// Update the homepage Current Queue Status section
+async function updateHomeQueueStatus() {
+    try {
+        const res = await fetch(`${API_BASE_URL}/queue.php?action=status`, {
+            method: 'GET',
+            credentials: 'include',
+            cache: 'no-store'
+        });
+        if (!res.ok) return;
+        const data = await res.json();
+        if (!data || !data.success) return;
+
+        // Group by department_code
+        const groups = data.tokens.reduce((acc, t) => {
+            const code = (t.department_code || '').toLowerCase();
+            if (!acc[code]) acc[code] = { serving: null, next: null };
+            if (t.status === 'serving' && !acc[code].serving) acc[code].serving = t.token_number;
+            if (t.status === 'waiting' && !acc[code].next) acc[code].next = t.token_number;
+            return acc;
+        }, {});
+
+        const depts = ['opd','maternity','emergency','pediatrics'];
+        depts.forEach(code => {
+            const root = document.getElementById(`${code}-queue`);
+            if (!root) return;
+            const curEl = root.querySelector('.current-token');
+            const nextEl = root.querySelector('.next-token');
+            const g = groups[code] || {};
+            if (curEl) curEl.textContent = g.serving || '-';
+            if (nextEl) nextEl.textContent = g.next || '-';
+        });
+    } catch (e) {
+        // Silent fail on homepage
+        console.warn('[Home] updateHomeQueueStatus failed', e);
+    }
+}
+
+// Expose for inline scripts
+window.updateHomeQueueStatus = updateHomeQueueStatus;
 
 // Promote due appointments into queue tokens (backend-driven)
 async function promoteDueAppointments(departmentCode = '') {
@@ -97,7 +145,7 @@ async function createQueueToken(patientData) {
 async function getQueueStatus(departmentCode = '') {
     try {
         const url = departmentCode 
-            ? `${API_BASE_URL}/queue.php?action=status&department=${departmentCode}`
+            ? `${API_BASE_URL}/queue.php?action=status&department=${encodeURIComponent(departmentCode)}`
             : `${API_BASE_URL}/queue.php?action=status`;
 
         const response = await fetch(url, {

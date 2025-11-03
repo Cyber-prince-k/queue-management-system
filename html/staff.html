@@ -14,7 +14,7 @@
           <img src="../images/Screenshot 2025-11-01 111731.png" alt="QECH Logo" class="logo" />
           <div>
             <h1 data-i18n="hospital_name">Queen Elizabeth Central Hospital</h1>
-            <h2 data-i18n="system_name">Digital Queue Management System</h2>
+            <h2 data-i18n="system_name">Queue Management System</h2>
           </div>
         </div>
       </div>
@@ -108,7 +108,7 @@
         </div>
       </div>
       <div class="footer-bottom">
-        <p data-i18n="footer_line1">&copy; 2023 Queen Elizabeth Central Hospital - Digital Queue Management System</p>
+        <p data-i18n="footer_line1">&copy; 2023 Queen Elizabeth Central Hospital - Queue Management System</p>
       
       y
       </div>
@@ -132,7 +132,7 @@
     });
 
     let autoRefreshInterval = null;
-    let currentDepartment = 'opd';
+    let currentDepartment = null;
     let isQueuePaused = false;
 
     // Handler for marking patient as attended
@@ -247,7 +247,11 @@
 
     // Initialize on page load
     document.addEventListener('DOMContentLoaded', () => {
-      // Start auto-refresh for default department with actions enabled
+      // Read initial department from selector
+      const deptSelect = document.getElementById('staff-department');
+      currentDepartment = (deptSelect && deptSelect.value) ? deptSelect.value : 'opd';
+      
+      // Start auto-refresh for selected department with actions enabled
       autoRefreshInterval = startAutoRefresh(currentDepartment, 10000, true);
       
       // Hide resume button initially

@@ -17,7 +17,7 @@
           <img src="../images/Screenshot 2025-11-01 111731.png" alt="QECH Logo" class="logo" />
           <div>
             <h1 data-i18n="hospital_name">Queen Elizabeth Central Hospital</h1>
-            <h2 data-i18n="system_name">Digital Queue Management System</h2>
+            <h2 data-i18n="system_name">Queue Management System</h2>
           </div>
         </div>
       </div>
@@ -274,7 +274,7 @@
         </div>
       </div>
       <div class="footer-bottom">
-        <p>&copy; 2023 Queen Elizabeth Central Hospital - Digital Queue Management System</p>
+        <p>&copy; 2023 Queen Elizabeth Central Hospital - Queue Management System</p>
         
       </div>
     </div>
@@ -318,7 +318,14 @@
     
     // Define API_BASE_URL only if not already defined
     if (typeof API_BASE_URL === 'undefined') {
-      var API_BASE_URL = 'http://localhost/queue%20system/php/api';
+      (function(){
+        var origin = window.location.origin;
+        var base = '/queue%20system/php/api';
+        if (!window.location.pathname.includes('/queue%20system/')) {
+          base = '/php/api';
+        }
+        window.API_BASE_URL = origin + base;
+      })();
     }
     console.log('✓ API_BASE_URL:', API_BASE_URL);
     
@@ -347,6 +354,19 @@
             const data = await response.json();
             console.log('Response data:', data);
             console.log('Token data:', data.token);
+            if (data && data.notifications) {
+                console.log('Notifications:', data.notifications);
+                if (data.notifications.email) {
+                    const em = data.notifications.email;
+                    if (typeof showToast === 'function') {
+                        if (em.success) {
+                            showToast('success', 'Email sent with your token');
+                        } else {
+                            showToast('error', 'Email not sent: ' + (em.message || 'configure SMTP'));
+                        }
+                    }
+                }
+            }
 
             if (data.success && data.token) {
                 console.log('✓ Token created, calling displayTokenDetails...');
@@ -459,6 +479,33 @@
     }
     
     console.log('✓ Queue functions defined');
+
+    // Get queue status (department optional). Local copy to avoid relying on queue.js
+    async function getQueueStatus(departmentCode = '') {
+        try {
+            const url = departmentCode 
+                ? `${API_BASE_URL}/queue.php?action=status&department=${encodeURIComponent(departmentCode)}`
+                : `${API_BASE_URL}/queue.php?action=status`;
+
+            const response = await fetch(url, {
+                method: 'GET',
+                credentials: 'include'
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            if (data && data.success && Array.isArray(data.tokens)) {
+                return data.tokens;
+            }
+            return [];
+        } catch (error) {
+            console.error('Get queue status error:', error);
+            return [];
+        }
+    }
     
     // ===== APPOINTMENT FUNCTIONS =====
     

@@ -53,10 +53,17 @@ function getDBConnection() {
     return $conn;
 }
 
-// CORS headers for API
-header('Access-Control-Allow-Origin: *');
+// CORS headers for API (support credentials from same-site or LAN clients)
+$origin = $_SERVER['HTTP_ORIGIN'] ?? '';
+if ($origin) {
+    header('Access-Control-Allow-Origin: ' . $origin);
+    header('Vary: Origin');
+} else {
+    header('Access-Control-Allow-Origin: *');
+}
 header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type, Authorization');
+header('Access-Control-Allow-Credentials: true');
 header('Content-Type: application/json');
 
 // Handle preflight requests

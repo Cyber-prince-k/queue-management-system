@@ -1,6 +1,6 @@
 # QECH Queue Management System
 
-A comprehensive digital queue management system for Queen Elizabeth Central Hospital (QECH) in Blantyre, Malawi.
+A comprehensive queue management system for Queen Elizabeth Central Hospital (QECH) in Blantyre, Malawi.
 
 ## 🎯 Overview
 

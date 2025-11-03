@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Digital Queue Management System - QECH</title>
+    <title>Queue Management System - QECH</title>
     <link rel="stylesheet" href="./css/style.css">
 </head>
 <body>
@@ -14,7 +14,7 @@
                     <img src="./images/Screenshot 2025-11-01 111731.png" alt="QECH Logo" class="logo">
                     <div>
                         <h1 data-i18n="hospital_name">Queen Elizabeth Central Hospital</h1>
-                        <h2 data-i18n="system_name">Digital Queue Management System</h2>
+                        <h2 data-i18n="system_name">Queue Management System</h2>
                     </div>
                 </div>
             </div>
@@ -38,14 +38,14 @@
     <main class="container">
         <!-- Welcome Hero Section -->
         <section id="welcome-section" class="card" style="text-align:center;">
-            <h2>Welcome to QECH Digital Queue Management</h2>
-            <p style="max-width:720px;margin:0.5rem auto 1rem;">
+            <h2 data-i18n="welcome_title">Welcome to QECH Queue Management System</h2>
+            <p data-i18n="welcome_desc" style="max-width:720px;margin:0.5rem auto 1rem;">
                 Streamline patient flow across departments and reduce waiting times. Please login or create an account to access your dashboard. Public display shows live tokens being served.
             </p>
             <div class="control-buttons" style="justify-content:center;">
-                <a class="btn btn-primary" href="./html/login.html">Login</a>
-                <a class="btn btn-secondary" href="./html/register.html">Create Account</a>
-                <a class="btn btn-success" href="./html/display.html">View Public Display</a>
+                <a class="btn btn-primary" href="./html/login.html" data-i18n="btn_login">Login</a>
+                <a class="btn btn-secondary" href="./html/register.html" data-i18n="btn_create_account">Create Account</a>
+                <a class="btn btn-success" href="./html/display.html" data-i18n="btn_view_public">View Public Display</a>
             </div>
         </section>
 
@@ -62,29 +62,29 @@
                 <div class="department-queue">
                     <h3 data-i18n="dept_opd">Outpatient Department (OPD)</h3>
                     <div id="opd-queue" class="queue-display">
-                        <p>Currently Serving: <span class="current-token">-</span></p>
-                        <p>Next: <span class="next-token">-</span></p>
+                        <p><span data-i18n="label_currently_serving">Currently Serving:</span> <span class="current-token">-</span></p>
+                        <p><span data-i18n="label_next">Next:</span> <span class="next-token">-</span></p>
                     </div>
                 </div>
                 <div class="department-queue">
                     <h3 data-i18n="dept_maternity">Maternity</h3>
                     <div id="maternity-queue" class="queue-display">
-                        <p>Currently Serving: <span class="current-token">-</span></p>
-                        <p>Next: <span class="next-token">-</span></p>
+                        <p><span data-i18n="label_currently_serving">Currently Serving:</span> <span class="current-token">-</span></p>
+                        <p><span data-i18n="label_next">Next:</span> <span class="next-token">-</span></p>
                     </div>
                 </div>
                 <div class="department-queue">
                     <h3 data-i18n="dept_emergency">Emergency</h3>
                     <div id="emergency-queue" class="queue-display">
-                        <p>Currently Serving: <span class="current-token">-</span></p>
-                        <p>Next: <span class="next-token">-</span></p>
+                        <p><span data-i18n="label_currently_serving">Currently Serving:</span> <span class="current-token">-</span></p>
+                        <p><span data-i18n="label_next">Next:</span> <span class="next-token">-</span></p>
                     </div>
                 </div>
                 <div class="department-queue">
                     <h3 data-i18n="dept_pediatrics">Pediatrics</h3>
                     <div id="pediatrics-queue" class="queue-display">
-                        <p>Currently Serving: <span class="current-token">-</span></p>
-                        <p>Next: <span class="next-token">-</span></p>
+                        <p><span data-i18n="label_currently_serving">Currently Serving:</span> <span class="current-token">-</span></p>
+                        <p><span data-i18n="label_next">Next:</span> <span class="next-token">-</span></p>
                     </div>
                 </div>
             </div>
@@ -115,12 +115,22 @@
                 </div>
             </div>
             <div class="footer-bottom">
-                <p>&copy; 2023 Queen Elizabeth Central Hospital - Digital Queue Management System</p>
+                <p data-i18n="footer_line1">&copy; 2023 Queen Elizabeth Central Hospital - Queue Management System</p>
             </div>
         </div>
     </footer>
 
     <script src="./js/auth.js"></script>
+    <script src="./js/queue.js"></script>
     <script src="./js/style.js"></script>
+    <script>
+      // Auto-refresh current queue status on the home page
+      document.addEventListener('DOMContentLoaded', () => {
+        if (typeof updateHomeQueueStatus === 'function') {
+          updateHomeQueueStatus();
+          setInterval(updateHomeQueueStatus, 10000);
+        }
+      });
+    </script>
 </body>
 </html>

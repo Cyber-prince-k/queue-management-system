@@ -388,6 +388,26 @@ elseif ($method === 'POST' && isset($_GET['action']) && $_GET['action'] === 'rea
     $stmt->bind_param("iis", $token_id, $staff_id, $notes);
     $stmt->execute();
     
+    // Notify patient by email about reassignment (best-effort)
+    try {
+        $info = $conn->prepare("SELECT qt.token_number, qt.patient_name, qt.patient_email, qt.queue_position, d.code AS department_code, d.name AS department_name
+                                 FROM queue_tokens qt
+                                 JOIN departments d ON qt.department_id = d.id
+                                 WHERE qt.id = ?");
+        $info->bind_param('i', $token_id);
+        $info->execute();
+        $resInfo = $info->get_result();
+        if ($row = $resInfo->fetch_assoc()) {
+            if (!empty($row['patient_email'])) {
+                $subj = 'Your QECH Queue Update';
+                $msg = "QECH: Hi {$row['patient_name']}, your token {$row['token_number']} has been reassigned to {$row['department_name']} ({$row['department_code']}). Your new queue position is #{$row['queue_position']}.";
+                @send_email_notification($row['patient_email'], $subj, $msg);
+            }
+        }
+    } catch (Throwable $e) {
+        // ignore
+    }
+
     echo json_encode(['success' => true, 'message' => 'Patient reassigned successfully']);
     
     $stmt->close();
@@ -415,6 +435,26 @@ elseif ($method === 'POST' && isset($_GET['action']) && $_GET['action'] === 'mar
     $stmt->bind_param("ii", $token_id, $staff_id);
     $stmt->execute();
     
+    // Notify patient by email (best-effort)
+    try {
+        $info = $conn->prepare("SELECT qt.token_number, qt.patient_name, qt.patient_email, d.name AS department_name
+                                 FROM queue_tokens qt
+                                 JOIN departments d ON qt.department_id = d.id
+                                 WHERE qt.id = ?");
+        $info->bind_param('i', $token_id);
+        $info->execute();
+        $resInfo = $info->get_result();
+        if ($row = $resInfo->fetch_assoc()) {
+            if (!empty($row['patient_email'])) {
+                $subj = 'Your QECH Visit Completed';
+                $msg = "QECH: Thank you {$row['patient_name']}. Your visit for token {$row['token_number']} at {$row['department_name']} has been marked as attended.";
+                @send_email_notification($row['patient_email'], $subj, $msg);
+            }
+        }
+    } catch (Throwable $e) {
+        // ignore
+    }
+
     echo json_encode(['success' => true, 'message' => 'Patient marked as attended']);
     
     $stmt->close();

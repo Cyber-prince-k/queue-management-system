@@ -2,6 +2,7 @@
 // Appointments API for QECH Queue System
 // NOTE: Headers and session are initialized in ../config.php
 require_once '../config.php';
+require_once __DIR__ . '/notify_util.php';
 
 // Initialize a global DB connection for all functions in this file
 $conn = getDBConnection();
@@ -161,6 +162,14 @@ function createAppointment() {
         
         // Get full appointment details
         $appointment = getAppointmentById($appointment_id);
+        if (!empty($bp_patient_email)) {
+            try {
+                $subj = 'Your QECH Appointment Confirmation';
+                $msg = "QECH: Hi {$bp_patient_name}, your appointment {$appointment['appointment_number']} is booked for {$appointment['appointment_date']} at {$appointment['appointment_time']} in {$appointment['department_name']}.";
+                @send_email_notification($bp_patient_email, $subj, $msg);
+            } catch (Throwable $e) {
+            }
+        }
         
         echo json_encode([
             'success' => true,
@@ -380,6 +389,16 @@ function promoteDueAppointments() {
             $hist->bind_param('iis', $appt['id'], $patient_id, $notes);
             $hist->execute();
             
+            $patient_email = $appt['patient_email'] ?? null;
+            if (!empty($patient_email)) {
+                try {
+                    $subj = 'Your QECH Queue Token';
+                    $msg = "QECH: Hi {$patient_name}, your token {$token_number} has been issued for {$appt['department_code']}. Your queue position is #{$queue_position}.";
+                    @send_email_notification($patient_email, $subj, $msg);
+                } catch (Throwable $e) {
+                }
+            }
+
             $promoted++;
         } else {
             $errors[] = 'Failed to create token for appointment ' . $appt['appointment_number'];

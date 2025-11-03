@@ -1,7 +1,14 @@
 // Authentication JavaScript for QECH Queue System
 // Define API_BASE_URL only if not already defined
 if (typeof API_BASE_URL === 'undefined') {
-    var API_BASE_URL = 'http://localhost/queue%20system/php/api';
+    (function(){
+        var origin = window.location.origin;
+        var base = '/queue%20system/php/api';
+        if (!window.location.pathname.includes('/queue%20system/')) {
+            base = '/php/api';
+        }
+        window.API_BASE_URL = origin + base;
+    })();
 }
 
 // Check if user is already logged in
