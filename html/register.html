@@ -21,8 +21,8 @@
       <nav aria-label="Primary">
         <ul>
           <li><a class="btn btn-secondary" href="../index.html" data-i18n="nav_home">Home</a></li>
-          <li><a class="btn btn-primary" href="register.html">Create Account</a></li>
-          <li><a class="btn btn-secondary" href="login.html">Login</a></li>
+          <li><a class="btn btn-primary" href="register.html" data-i18n="btn_create_account">Create Account</a></li>
+          <li><a class="btn btn-secondary" href="login.html" data-i18n="btn_login2">Login</a></li>
         </ul>
       </nav>
     </div>
@@ -31,37 +31,37 @@
   <main class="container">
     <section class="card" style="max-width:560px;margin:0 auto;">
       <div class="section-header">
-        <h2>Create Account</h2>
+        <h2 data-i18n="btn_create_account">Create Account</h2>
       </div>
       <form id="register-form">
         <div class="form-group">
-          <label for="reg-name">Full Name</label>
-          <input type="text" id="reg-name" required />
+          <label for="reg-name" data-i18n="lbl_name">Name</label>
+          <input type="text" id="reg-name" data-i18n="ph_full_name" data-i18n-attr="placeholder" required />
         </div>
         <div class="form-group">
-          <label for="reg-username">Username</label>
+          <label for="reg-username" data-i18n="lbl_username">Username</label>
           <input type="text" id="reg-username" required />
         </div>
         <div class="form-group">
-          <label for="reg-role">User Type</label>
+          <label for="reg-role" data-i18n="lbl_role">Role</label>
           <select id="reg-role" required>
-            <option value="">Select role</option>
-            <option value="patient">Patient</option>
-            <option value="staff">Staff</option>
-            <option value="admin">Admin</option>
+            <option value="" data-i18n="opt_select_role">Select role</option>
+            <option value="patient" data-i18n="patient_portal">Patient</option>
+            <option value="staff" data-i18n="staff_portal">Staff</option>
+            <option value="admin" data-i18n="admin_portal">Admin</option>
           </select>
         </div>
         <div class="form-group">
-          <label for="reg-password">Password</label>
+          <label for="reg-password" data-i18n="lbl_password">Password</label>
           <input type="password" id="reg-password" required />
         </div>
         <div class="form-group">
-          <label for="reg-confirm">Confirm Password</label>
+          <label for="reg-confirm" data-i18n="lbl_confirm_password">Confirm Password</label>
           <input type="password" id="reg-confirm" required />
         </div>
-        <button type="submit" class="btn btn-primary">Create Account</button>
+        <button type="submit" class="btn btn-primary" data-i18n="btn_create_account">Create Account</button>
       </form>
-      <p style="margin-top:0.75rem;">Already have an account? <a href="login.html">Login</a>.</p>
+      <p style="margin-top:0.75rem;"><span data-i18n="prompt_have_account">Already have an account?</span> <a href="login.html" data-i18n="btn_login2">Login</a>.</p>
     </section>
   </main>
 
@@ -69,20 +69,20 @@
     <div class="container">
       <div class="footer-content">
         <div class="footer-section">
-          <h3>About QECH</h3>
-          <p>Queen Elizabeth Central Hospital is Malawi's largest referral hospital, providing quality healthcare services to the nation.</p>
+          <h3 data-i18n="about_qech">About QECH</h3>
+          <p data-i18n="about_qech_desc">Queen Elizabeth Central Hospital is Malawi's largest referral hospital, providing quality healthcare services to the nation.</p>
         </div>
         <div class="footer-section">
-          <h3>Quick Links</h3>
+          <h3 data-i18n="quick_links">Quick Links</h3>
           <ul>
-            <li><a href="patient.html">Patient Portal</a></li>
-            <li><a href="staff.html">Staff Portal</a></li>
-            <li><a href="admin.html">Admin Portal</a></li>
-            <li><a href="display.html">Public Display</a></li>
+            <li><a href="patient.html" data-i18n="patient_portal">Patient Portal</a></li>
+            <li><a href="staff.html" data-i18n="staff_portal">Staff Portal</a></li>
+            <li><a href="admin.html" data-i18n="admin_portal">Admin Portal</a></li>
+            <li><a href="display.html" data-i18n="nav_display">Public Display</a></li>
           </ul>
         </div>
         <div class="footer-section">
-          <h3>Contact</h3>
+          <h3 data-i18n="contact">Contact</h3>
           <p>Queen Elizabeth Central Hospital<br>
           Blantyre, Malawi<br>
           Phone: +265 1 871 111</p>
@@ -110,24 +110,24 @@
       
       // Validate passwords match
       if (password !== confirmPassword) {
-        showToast('Passwords do not match!', 'error');
+        showToast((typeof t==='function'? t('err_passwords_mismatch') : 'Passwords do not match!'), 'error');
         return;
       }
       
       // Validate role selected
       if (!role) {
-        showToast('Please select a user type!', 'error');
+        showToast((typeof t==='function'? t('err_select_role') : 'Please select a user type!'), 'error');
         return;
       }
       
       const submitBtn = e.target.querySelector('button[type="submit"]');
       submitBtn.disabled = true;
-      submitBtn.textContent = 'Creating Account...';
+      submitBtn.textContent = (typeof t==='function'? t('creating_account') : 'Creating Account...');
       
       await register(username, password, fullName, role);
       
       submitBtn.disabled = false;
-      submitBtn.textContent = 'Create Account';
+      submitBtn.textContent = (typeof t==='function'? t('btn_create_account') : 'Create Account');
     });
   </script>
 </body>

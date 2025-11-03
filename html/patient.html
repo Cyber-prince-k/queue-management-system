@@ -38,88 +38,82 @@
       </div>
 
       <div class="tabs" role="tablist" aria-label="Patient Actions">
-        <button class="tab-btn active" data-tab="register-tab" role="tab" aria-selected="true" aria-controls="register-tab">Register</button>
-        <button class="tab-btn" data-tab="queue-status-tab" role="tab" aria-selected="false" aria-controls="queue-status-tab">Queue Status</button>
-        <button class="tab-btn" data-tab="appointment-tab" role="tab" aria-selected="false" aria-controls="appointment-tab">Book Appointment</button>
+        <button class="tab-btn active" data-tab="register-tab" role="tab" aria-selected="true" aria-controls="register-tab" data-i18n="btn_register">Register</button>
+        <button class="tab-btn" data-tab="queue-status-tab" role="tab" aria-selected="false" aria-controls="queue-status-tab" data-i18n="queue_status">Queue Status</button>
+        <button class="tab-btn" data-tab="appointment-tab" role="tab" aria-selected="false" aria-controls="appointment-tab" data-i18n="book_appointment">Book Appointment</button>
       </div>
 
       <section id="register-tab" class="tab-content active" role="tabpanel" aria-labelledby="Register">
         <div class="info-banner" style="background: #dbeafe; border-left: 4px solid #2563eb; padding: 1rem; margin-bottom: 1.5rem; border-radius: 8px;">
-          <h3 style="margin-top: 0; color: #1e40af; font-size: 1.1rem;">📋 Queue Registration</h3>
-          <p style="margin: 0.5rem 0; color: #1e3a8a; line-height: 1.6;">
-            Please fill in your details below and select the department you wish to visit. 
-            Once submitted, you will receive a queue token number and be placed in line for service at your selected department.
-            Your request will appear on the staff dashboard for processing.
-          </p>
+          <h3 style="margin-top: 0; color: #1e40af; font-size: 1.1rem;" data-i18n="queue_registration_title">📋 Queue Registration</h3>
+          <p style="margin: 0.5rem 0; color: #1e3a8a; line-height: 1.6;" data-i18n="queue_registration_desc">Please fill in your details below and select the department you wish to visit. Once submitted, you will receive a queue token number and be placed in line for service at your selected department. Your request will appear on the staff dashboard for processing.</p>
         </div>
 
-        <h3>Patient Registration & Queue Request</h3>
+        <h3 data-i18n="patient_registration_title">Patient Registration & Queue Request</h3>
         <form id="patient-registration-form">
           <div class="form-group">
-            <label for="patient-name">Full Name <span style="color: #ef4444;">*</span></label>
-            <input type="text" id="patient-name" name="patient-name" placeholder="Enter your full name" required />
+            <label for="patient-name" data-i18n="lbl_patient_name">Full Name <span style="color: #ef4444;">*</span></label>
+            <input type="text" id="patient-name" name="patient-name" placeholder="Enter your full name" data-i18n="ph_full_name" data-i18n-attr="placeholder" required />
           </div>
           
           <div class="form-group">
-            <label for="patient-age">Age <span style="color: #ef4444;">*</span></label>
-            <input type="number" id="patient-age" name="patient-age" min="0" max="150" placeholder="Enter your age" required />
+            <label for="patient-age" data-i18n="lbl_age">Age <span style="color: #ef4444;">*</span></label>
+            <input type="number" id="patient-age" name="patient-age" min="0" max="150" placeholder="Enter your age" data-i18n="ph_age" data-i18n-attr="placeholder" required />
           </div>
           
           <div class="form-group">
-            <label for="patient-phone">Phone Number <span style="color: #ef4444;">*</span></label>
-            <input type="tel" id="patient-phone" name="patient-phone" placeholder="e.g., +265 999 123 456" required />
+            <label for="patient-phone" data-i18n="lbl_phone">Phone Number <span style="color: #ef4444;">*</span></label>
+            <input type="tel" id="patient-phone" name="patient-phone" placeholder="e.g., +265 999 123 456" data-i18n="ph_phone" data-i18n-attr="placeholder" required />
           </div>
           
           <div class="form-group">
-            <label for="patient-email">Email Address</label>
-            <input type="email" id="patient-email" name="patient-email" placeholder="your.email@example.com" />
+            <label for="patient-email" data-i18n="lbl_email">Email Address</label>
+            <input type="email" id="patient-email" name="patient-email" placeholder="your.email@example.com" data-i18n="ph_email" data-i18n-attr="placeholder" />
           </div>
           
           <div class="form-group">
-            <label for="patient-id">ID Number <span style="color: #ef4444;">*</span></label>
-            <input type="text" id="patient-id" name="patient-id" placeholder="National ID or Passport Number" required />
+            <label for="patient-id" data-i18n="lbl_patient_id">ID Number <span style="color: #ef4444;">*</span></label>
+            <input type="text" id="patient-id" name="patient-id" placeholder="National ID or Passport Number" data-i18n="ph_patient_id" data-i18n-attr="placeholder" required />
           </div>
           
           <div class="form-group">
-            <label for="patient-address">Address</label>
-            <textarea id="patient-address" name="patient-address" rows="2" placeholder="Your residential address (optional)"></textarea>
+            <label for="patient-address" data-i18n="lbl_address">Address</label>
+            <textarea id="patient-address" name="patient-address" rows="2" placeholder="Your residential address (optional)" data-i18n="ph_address" data-i18n-attr="placeholder"></textarea>
           </div>
           
           <div class="form-group">
-            <label for="patient-department">Department to Visit <span style="color: #ef4444;">*</span></label>
+            <label for="patient-department" data-i18n="lbl_department_visit">Department to Visit <span style="color: #ef4444;">*</span></label>
             <select id="patient-department" name="patient-department" required>
-              <option value="">-- Select Department --</option>
-              <option value="opd">Outpatient Department (OPD)</option>
-              <option value="maternity">Maternity</option>
-              <option value="emergency">Emergency</option>
-              <option value="pediatrics">Pediatrics</option>
+              <option value="" data-i18n="opt_select_department">-- Select Department --</option>
+              <option value="opd" data-i18n="dept_opd">Outpatient Department (OPD)</option>
+              <option value="maternity" data-i18n="dept_maternity">Maternity</option>
+              <option value="emergency" data-i18n="dept_emergency">Emergency</option>
+              <option value="pediatrics" data-i18n="dept_pediatrics">Pediatrics</option>
             </select>
           </div>
           
           <div class="form-group">
-            <label for="service-type">Service Required</label>
-            <input type="text" id="service-type" name="service-type" placeholder="e.g., Consultation, Check-up, Follow-up" />
+            <label for="service-type" data-i18n="lbl_service_type">Service Required</label>
+            <input type="text" id="service-type" name="service-type" placeholder="e.g., Consultation, Check-up, Follow-up" data-i18n="ph_service_type" data-i18n-attr="placeholder" />
           </div>
           
           <div class="form-group">
-            <label for="priority-case">Priority Case</label>
+            <label for="priority-case" data-i18n="lbl_priority">Priority Case</label>
             <select id="priority-case" name="priority-case">
-              <option value="no">No Priority</option>
-              <option value="emergency">Emergency</option>
-              <option value="elderly">Elderly (65+)</option>
-              <option value="pregnant">Pregnant</option>
-              <option value="disability">Disability</option>
+              <option value="no" data-i18n="priority_no">No Priority</option>
+              <option value="emergency" data-i18n="dept_emergency">Emergency</option>
+              <option value="elderly" data-i18n="priority_elderly">Elderly (65+)</option>
+              <option value="pregnant" data-i18n="priority_pregnant">Pregnant</option>
+              <option value="disability" data-i18n="priority_disability">Disability</option>
             </select>
-            <small style="color: #64748b; display: block; margin-top: 0.25rem;">Select if you qualify for priority service</small>
+            <small style="color: #64748b; display: block; margin-top: 0.25rem;" data-i18n="hint_priority">Select if you qualify for priority service</small>
           </div>
           
           <div style="background: #fef3c7; border-left: 4px solid #f59e0b; padding: 1rem; margin: 1rem 0; border-radius: 8px;">
-            <p style="margin: 0; color: #92400e; font-size: 0.9rem;">
-              <strong>⚠️ Important:</strong> After submitting, you will receive a token number. Please keep this number safe as you will need it to check your queue position.
-            </p>
+            <p style="margin: 0; color: #92400e; font-size: 0.9rem;" data-i18n="important_submit_token"><strong>⚠️ Important:</strong> After submitting, you will receive a token number. Please keep this number safe as you will need it to check your queue position.</p>
           </div>
           
-          <button type="submit" class="btn btn-primary" style="width: 100%; padding: 0.75rem; font-size: 1.1rem;">
+          <button type="submit" class="btn btn-primary" style="width: 100%; padding: 0.75rem; font-size: 1.1rem;" data-i18n="submit_join_queue">
             📝 Submit & Join Queue
           </button>
         </form>
@@ -128,98 +122,95 @@
       </section>
 
       <section id="queue-status-tab" class="tab-content" role="tabpanel" aria-labelledby="Queue Status">
-        <h3>Check Queue Status</h3>
+        <h3 data-i18n="check_queue_status">Check Queue Status</h3>
         <form id="queue-status-form">
           <div class="form-group">
-            <label for="queue-token">Token or Appointment Number</label>
-            <input type="text" id="queue-token" name="queue-token" placeholder="Paste your queue token (e.g., OPD-20251101-0001) or appointment number (e.g., OPD202511010001)" required />
+            <label for="queue-token" data-i18n="lbl_token_or_appt">Token or Appointment Number</label>
+            <input type="text" id="queue-token" name="queue-token" placeholder="Paste your queue token (e.g., OPD-20251101-0001) or appointment number (e.g., OPD202511010001)" data-i18n="ph_token_or_appt" data-i18n-attr="placeholder" required />
           </div>
-          <button type="submit" class="btn btn-primary">Check Status</button>
+          <button type="submit" class="btn btn-primary" data-i18n="btn_check_status">Check Status</button>
         </form>
         <div id="queue-status-result" class="queue-display hidden" aria-live="polite"></div>
       </section>
 
       <section id="appointment-tab" class="tab-content" role="tabpanel" aria-labelledby="Book Appointment">
         <div class="info-banner" style="background: #f0fdf4; border-left: 4px solid #10b981; padding: 1rem; margin-bottom: 1.5rem; border-radius: 8px;">
-          <h3 style="margin-top: 0; color: #047857; font-size: 1.1rem;">📅 Book an Appointment</h3>
-          <p style="margin: 0.5rem 0; color: #065f46; line-height: 1.6;">
-            Schedule your visit in advance by booking an appointment. Choose your preferred date, time, and department.
-            You will receive an appointment confirmation number that you can use to check your appointment status.
-          </p>
+          <h3 style="margin-top: 0; color: #047857; font-size: 1.1rem;" data-i18n="book_appointment_title">📅 Book an Appointment</h3>
+          <p style="margin: 0.5rem 0; color: #065f46; line-height: 1.6;" data-i18n="book_appointment_desc">Schedule your visit in advance by booking an appointment. Choose your preferred date, time, and department. You will receive an appointment confirmation number that you can use to check your appointment status.</p>
         </div>
 
-        <h3>Schedule Your Appointment</h3>
+        <h3 data-i18n="schedule_appointment">Schedule Your Appointment</h3>
         <form id="appointment-booking-form">
           <div class="form-group">
-            <label for="appt-patient-name">Full Name <span style="color: #ef4444;">*</span></label>
-            <input type="text" id="appt-patient-name" name="appt-patient-name" placeholder="Enter your full name" required />
+            <label for="appt-patient-name" data-i18n="lbl_patient_name">Full Name <span style="color: #ef4444;">*</span></label>
+            <input type="text" id="appt-patient-name" name="appt-patient-name" placeholder="Enter your full name" data-i18n="ph_full_name" data-i18n-attr="placeholder" required />
           </div>
           
           <div class="form-group">
-            <label for="appt-patient-age">Age</label>
-            <input type="number" id="appt-patient-age" name="appt-patient-age" min="0" max="150" placeholder="Enter your age" />
+            <label for="appt-patient-age" data-i18n="lbl_age">Age</label>
+            <input type="number" id="appt-patient-age" name="appt-patient-age" min="0" max="150" placeholder="Enter your age" data-i18n="ph_age" data-i18n-attr="placeholder" />
           </div>
           
           <div class="form-group">
-            <label for="appt-patient-phone">Phone Number <span style="color: #ef4444;">*</span></label>
-            <input type="tel" id="appt-patient-phone" name="appt-patient-phone" placeholder="e.g., +265 999 123 456" required />
+            <label for="appt-patient-phone" data-i18n="lbl_phone">Phone Number <span style="color: #ef4444;">*</span></label>
+            <input type="tel" id="appt-patient-phone" name="appt-patient-phone" placeholder="e.g., +265 999 123 456" data-i18n="ph_phone" data-i18n-attr="placeholder" required />
           </div>
           
           <div class="form-group">
-            <label for="appt-patient-id">ID Number</label>
-            <input type="text" id="appt-patient-id" name="appt-patient-id" placeholder="National ID or Passport Number" />
+            <label for="appt-patient-id" data-i18n="lbl_patient_id">ID Number</label>
+            <input type="text" id="appt-patient-id" name="appt-patient-id" placeholder="National ID or Passport Number" data-i18n="ph_patient_id" data-i18n-attr="placeholder" />
           </div>
           
           <div class="form-group">
-            <label for="appt-patient-email">Email Address</label>
-            <input type="email" id="appt-patient-email" name="appt-patient-email" placeholder="your.email@example.com" />
+            <label for="appt-patient-email" data-i18n="lbl_email">Email Address</label>
+            <input type="email" id="appt-patient-email" name="appt-patient-email" placeholder="your.email@example.com" data-i18n="ph_email" data-i18n-attr="placeholder" />
           </div>
           
           <div class="form-group">
-            <label for="appt-department">Department <span style="color: #ef4444;">*</span></label>
+            <label for="appt-department" data-i18n="lbl_department">Department <span style="color: #ef4444;">*</span></label>
             <select id="appt-department" name="appt-department" required>
-              <option value="">-- Select Department --</option>
-              <option value="opd">Outpatient Department (OPD)</option>
-              <option value="maternity">Maternity</option>
-              <option value="emergency">Emergency</option>
-              <option value="pediatrics">Pediatrics</option>
+              <option value="" data-i18n="opt_select_department">-- Select Department --</option>
+              <option value="opd" data-i18n="dept_opd">Outpatient Department (OPD)</option>
+              <option value="maternity" data-i18n="dept_maternity">Maternity</option>
+              <option value="emergency" data-i18n="dept_emergency">Emergency</option>
+              <option value="pediatrics" data-i18n="dept_pediatrics">Pediatrics</option>
             </select>
           </div>
           
           <div class="form-group">
-            <label for="appt-date">Appointment Date <span style="color: #ef4444;">*</span></label>
+            <label for="appt-date" data-i18n="lbl_appointment_date">Appointment Date <span style="color: #ef4444;">*</span></label>
             <input type="date" id="appt-date" name="appt-date" required />
-            <small style="color: #64748b; display: block; margin-top: 0.25rem;">Select a date for your appointment</small>
+            <small style="color: #64748b; display: block; margin-top: 0.25rem;" data-i18n="hint_select_date">Select a date for your appointment</small>
           </div>
           
           <div class="form-group">
-            <label for="appt-time">Preferred Time <span style="color: #ef4444;">*</span></label>
+            <label for="appt-time" data-i18n="lbl_appointment_time">Preferred Time <span style="color: #ef4444;">*</span></label>
             <select id="appt-time" name="appt-time" required>
-              <option value="">-- Select Time --</option>
+              <option value="" data-i18n="opt_select_time">-- Select Time --</option>
             </select>
-            <small style="color: #64748b; display: block; margin-top: 0.25rem;">Available time slots will appear after selecting date and department</small>
+            <small style="color: #64748b; display: block; margin-top: 0.25rem;" data-i18n="hint_time_slots">Available time slots will appear after selecting date and department</small>
           </div>
           
           <div class="form-group">
-            <label for="appt-service-type">Service Required</label>
-            <input type="text" id="appt-service-type" name="appt-service-type" placeholder="e.g., Consultation, Check-up, Follow-up" />
+            <label for="appt-service-type" data-i18n="lbl_service_type">Service Required</label>
+            <input type="text" id="appt-service-type" name="appt-service-type" placeholder="e.g., Consultation, Check-up, Follow-up" data-i18n="ph_service_type" data-i18n-attr="placeholder" />
           </div>
           
           <div class="form-group">
-            <label for="appt-reason">Reason for Visit</label>
-            <textarea id="appt-reason" name="appt-reason" rows="3" placeholder="Brief description of your medical concern (optional)"></textarea>
+            <label for="appt-reason" data-i18n="lbl_reason">Reason for Visit</label>
+            <textarea id="appt-reason" name="appt-reason" rows="3" placeholder="Brief description of your medical concern (optional)" data-i18n="ph_reason" data-i18n-attr="placeholder"></textarea>
           </div>
           
           <div class="form-group">
-            <label for="appt-priority">Priority Case</label>
+            <label for="appt-priority" data-i18n="lbl_priority">Priority Case</label>
             <select id="appt-priority" name="appt-priority">
-              <option value="no">No Priority</option>
+              <option value="no" data-i18n="priority_no">No Priority</option>
               <option value="emergency">Emergency</option>
-              <option value="elderly">Elderly (65+)</option>
-              <option value="pregnant">Pregnant</option>
-              <option value="disability">Disability</option>
+              <option value="elderly" data-i18n="priority_elderly">Elderly (65+)</option>
+              <option value="pregnant" data-i18n="priority_pregnant">Pregnant</option>
+              <option value="disability" data-i18n="priority_disability">Disability</option>
             </select>
-            <small style="color: #64748b; display: block; margin-top: 0.25rem;">Select if you qualify for priority service</small>
+            <small style="color: #64748b; display: block; margin-top: 0.25rem;" data-i18n="hint_priority">Select if you qualify for priority service</small>
           </div>
           
           <div style="background: #fef3c7; border-left: 4px solid #f59e0b; padding: 1rem; margin: 1rem 0; border-radius: 8px;">
@@ -228,21 +219,19 @@
             </p>
           </div>
           
-          <button type="submit" class="btn btn-primary" style="width: 100%; padding: 0.75rem; font-size: 1.1rem;">
-            📅 Book Appointment
-          </button>
+          <button type="submit" class="btn btn-primary" style="width: 100%; padding: 0.75rem; font-size: 1.1rem;" data-i18n="btn_book_appointment">📅 Book Appointment</button>
         </form>
         
         <div id="appointment-confirmation" style="margin-top: 1.5rem;"></div>
         
         <div style="margin-top: 2rem; padding-top: 2rem; border-top: 2px solid #e5e7eb;">
-          <h3>Check Appointment Status</h3>
+          <h3 data-i18n="check_appointment_status">Check Appointment Status</h3>
           <form id="appointment-status-form">
             <div class="form-group">
-              <label for="appt-number">Appointment Number</label>
-              <input type="text" id="appt-number" name="appt-number" placeholder="Enter your appointment number" required />
+              <label for="appt-number" data-i18n="lbl_appointment_number">Appointment Number</label>
+              <input type="text" id="appt-number" name="appt-number" placeholder="Enter your appointment number" data-i18n="ph_appointment_number" data-i18n-attr="placeholder" required />
             </div>
-            <button type="submit" class="btn btn-secondary">Check Appointment</button>
+            <button type="submit" class="btn btn-secondary" data-i18n="btn_check_appointment">Check Appointment</button>
           </form>
           <div id="appointment-status-result" style="margin-top: 1rem;"></div>
         </div>
@@ -254,27 +243,27 @@
     <div class="container">
       <div class="footer-content">
         <div class="footer-section">
-          <h3>About QECH</h3>
-          <p>Queen Elizabeth Central Hospital is Malawi's largest referral hospital, providing quality healthcare services to the nation.</p>
+          <h3 data-i18n="about_qech">About QECH</h3>
+          <p data-i18n="about_qech_desc">Queen Elizabeth Central Hospital is Malawi's largest referral hospital, providing quality healthcare services to the nation.</p>
         </div>
         <div class="footer-section">
-          <h3>Quick Links</h3>
+          <h3 data-i18n="quick_links">Quick Links</h3>
           <ul>
-            <li><a href="patient.html">Patient Portal</a></li>
-            <li><a href="staff.html">Staff Portal</a></li>
-            <li><a href="admin.html">Admin Portal</a></li>
-            <li><a href="display.html">Public Display</a></li>
+            <li><a href="patient.html" data-i18n="patient_portal">Patient Portal</a></li>
+            <li><a href="staff.html" data-i18n="staff_portal">Staff Portal</a></li>
+            <li><a href="admin.html" data-i18n="admin_portal">Admin Portal</a></li>
+            <li><a href="display.html" data-i18n="nav_display">Public Display</a></li>
           </ul>
         </div>
         <div class="footer-section">
-          <h3>Contact</h3>
+          <h3 data-i18n="contact">Contact</h3>
           <p>Queen Elizabeth Central Hospital<br>
           Blantyre, Malawi<br>
           Phone: +265 1 871 111</p>
         </div>
       </div>
       <div class="footer-bottom">
-        <p>&copy; 2023 Queen Elizabeth Central Hospital - Queue Management System</p>
+        <p data-i18n="footer_line1">&copy; 2023 Queen Elizabeth Central Hospital - Queue Management System</p>
         
       </div>
     </div>

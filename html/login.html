@@ -21,8 +21,8 @@
       <nav aria-label="Primary">
         <ul>
           <li><a class="btn btn-secondary" href="../index.html" data-i18n="nav_home">Home</a></li>
-          <li><a class="btn btn-secondary" href="register.html">Create Account</a></li>
-          <li><a class="btn btn-primary" href="login.html">Login</a></li>
+          <li><a class="btn btn-secondary" href="register.html" data-i18n="btn_create_account">Create Account</a></li>
+          <li><a class="btn btn-primary" href="login.html" data-i18n="btn_login2">Login</a></li>
         </ul>
       </nav>
     </div>
@@ -31,20 +31,20 @@
   <main class="container">
     <section class="card" style="max-width:560px;margin:0 auto;">
       <div class="section-header">
-        <h2>Login</h2>
+        <h2 data-i18n="heading_login">Login</h2>
       </div>
       <form id="login-form">
         <div class="form-group">
-          <label for="login-username">Username</label>
+          <label for="login-username" data-i18n="lbl_username">Username</label>
           <input type="text" id="login-username" required />
         </div>
         <div class="form-group">
-          <label for="login-password">Password</label>
+          <label for="login-password" data-i18n="lbl_password">Password</label>
           <input type="password" id="login-password" required />
         </div>
-        <button type="submit" class="btn btn-primary">Login</button>
+        <button type="submit" class="btn btn-primary" data-i18n="btn_login2">Login</button>
       </form>
-      <p style="margin-top:0.75rem;">Don't have an account? <a href="register.html">Create one</a>.</p>
+      <p style="margin-top:0.75rem;"><span data-i18n="prompt_no_account">Don't have an account?</span> <a href="register.html" data-i18n="link_create_one">Create one</a>.</p>
     </section>
   </main>
 
@@ -52,20 +52,20 @@
     <div class="container">
       <div class="footer-content">
         <div class="footer-section">
-          <h3>About QECH</h3>
-          <p>Queen Elizabeth Central Hospital is Malawi's largest referral hospital, providing quality healthcare services to the nation.</p>
+          <h3 data-i18n="about_qech">About QECH</h3>
+          <p data-i18n="about_qech_desc">Queen Elizabeth Central Hospital is Malawi's largest referral hospital, providing quality healthcare services to the nation.</p>
         </div>
         <div class="footer-section">
-          <h3>Quick Links</h3>
+          <h3 data-i18n="quick_links">Quick Links</h3>
           <ul>
-            <li><a href="patient.html">Patient Portal</a></li>
-            <li><a href="staff.html">Staff Portal</a></li>
-            <li><a href="admin.html">Admin Portal</a></li>
-            <li><a href="display.html">Public Display</a></li>
+            <li><a href="patient.html" data-i18n="patient_portal">Patient Portal</a></li>
+            <li><a href="staff.html" data-i18n="staff_portal">Staff Portal</a></li>
+            <li><a href="admin.html" data-i18n="admin_portal">Admin Portal</a></li>
+            <li><a href="display.html" data-i18n="nav_display">Public Display</a></li>
           </ul>
         </div>
         <div class="footer-section">
-          <h3>Contact</h3>
+          <h3 data-i18n="contact">Contact</h3>
           <p>Queen Elizabeth Central Hospital<br>
           Blantyre, Malawi<br>
           Phone: +265 1 871 111</p>
@@ -90,12 +90,12 @@
       
       const submitBtn = e.target.querySelector('button[type="submit"]');
       submitBtn.disabled = true;
-      submitBtn.textContent = 'Logging in...';
+      submitBtn.textContent = (typeof t==='function'? t('logging_in') : 'Logging in...');
       
       await login(username, password);
       
       submitBtn.disabled = false;
-      submitBtn.textContent = 'Login';
+      submitBtn.textContent = (typeof t==='function'? t('btn_login2') : 'Login');
     });
   </script>
 </body>

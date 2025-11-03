@@ -37,52 +37,52 @@
 
       <div class="admin-dashboard">
         <div class="admin-card">
-          <h3>Queue Statistics</h3>
+          <h3 data-i18n="queue_statistics">Queue Statistics</h3>
           <div id="queue-stats">
-            <p>Total Patients Today: <span id="total-patients">0</span></p>
-            <p>Average Wait Time: <span id="avg-wait-time">0 min</span></p>
-            <p>Currently Waiting: <span id="currently-waiting">0</span></p>
+            <p><span data-i18n="total_patients_today">Total Patients Today:</span> <span id="total-patients">0</span></p>
+            <p><span data-i18n="average_wait_time">Average Wait Time:</span> <span id="avg-wait-time">0 min</span></p>
+            <p><span data-i18n="currently_waiting">Currently Waiting:</span> <span id="currently-waiting">0</span></p>
           </div>
         </div>
 
         <div class="admin-card">
-          <h3>Reports</h3>
-          <p style="margin:.25rem 0 1rem; color:#475569;">Using data stored in the system, you can generate summaries such as the number of patients served, average waiting times, and the busiest departments. These insights help staff and administrators identify challenges and improve hospital operations.</p>
+          <h3 data-i18n="reports">Reports</h3>
+          <p style="margin:.25rem 0 1rem; color:#475569;" data-i18n="reports_desc">Using data stored in the system, you can generate summaries such as the number of patients served, average waiting times, and the busiest departments. These insights help staff and administrators identify challenges and improve hospital operations.</p>
           <div class="report-options" style="display: flex; flex-direction: column; gap: .75rem;">
             <div style="display:flex; gap:.5rem; flex-wrap:wrap; align-items:end;">
               <div>
-                <label for="report-start" style="display:block; font-size:.9rem; color:#334155;">Start Date</label>
+                <label for="report-start" style="display:block; font-size:.9rem; color:#334155;" data-i18n="start_date">Start Date</label>
                 <input type="date" id="report-start" />
               </div>
               <div>
-                <label for="report-end" style="display:block; font-size:.9rem; color:#334155;">End Date</label>
+                <label for="report-end" style="display:block; font-size:.9rem; color:#334155;" data-i18n="end_date">End Date</label>
                 <input type="date" id="report-end" />
               </div>
               <div>
-                <label for="report-dept" style="display:block; font-size:.9rem; color:#334155;">Department</label>
+                <label for="report-dept" style="display:block; font-size:.9rem; color:#334155;" data-i18n="lbl_department">Department</label>
                 <select id="report-dept">
-                  <option value="">All</option>
-                  <option value="opd">OPD</option>
-                  <option value="maternity">Maternity</option>
-                  <option value="emergency">Emergency</option>
-                  <option value="pediatrics">Pediatrics</option>
+                  <option value="" data-i18n="all">All</option>
+                  <option value="opd" data-i18n="opd_short">OPD</option>
+                  <option value="maternity" data-i18n="dept_maternity">Maternity</option>
+                  <option value="emergency" data-i18n="dept_emergency">Emergency</option>
+                  <option value="pediatrics" data-i18n="dept_pediatrics">Pediatrics</option>
                 </select>
               </div>
               <div style="display:flex; gap:.5rem;">
-                <button id="daily-report-btn" class="btn btn-primary">Generate Daily Report</button>
-                <button id="weekly-report-btn" class="btn btn-primary">Generate Weekly Report</button>
-                <button id="filtered-report-btn" class="btn btn-secondary">Run Filtered</button>
-                <button id="export-pdf-btn" class="btn">Export PDF</button>
+                <button id="daily-report-btn" class="btn btn-primary" data-i18n="generate_daily_report">Generate Daily Report</button>
+                <button id="weekly-report-btn" class="btn btn-primary" data-i18n="generate_weekly_report">Generate Weekly Report</button>
+                <button id="filtered-report-btn" class="btn btn-secondary" data-i18n="run_filtered">Run Filtered</button>
+                <button id="export-pdf-btn" class="btn" data-i18n="export_pdf">Export PDF</button>
               </div>
             </div>
           </div>
         </div>
 
         <div class="admin-card">
-          <h3>System Management</h3>
+          <h3 data-i18n="system_management">System Management</h3>
           <div class="system-controls">
-            <button id="reset-queues-btn" class="btn btn-danger">Reset All Queues</button>
-            <button id="backup-data-btn" class="btn btn-secondary">Backup Data</button>
+            <button id="reset-queues-btn" class="btn btn-danger" data-i18n="reset_all_queues">Reset All Queues</button>
+            <button id="backup-data-btn" class="btn btn-secondary" data-i18n="backup_data">Backup Data</button>
           </div>
         </div>
       </div>
@@ -95,20 +95,20 @@
     <div class="container">
       <div class="footer-content">
         <div class="footer-section">
-          <h3>About QECH</h3>
-          <p>Queen Elizabeth Central Hospital is Malawi's largest referral hospital, providing quality healthcare services to the nation.</p>
+          <h3 data-i18n="about_qech">About QECH</h3>
+          <p data-i18n="about_qech_desc">Queen Elizabeth Central Hospital is Malawi's largest referral hospital, providing quality healthcare services to the nation.</p>
         </div>
         <div class="footer-section">
-          <h3>Quick Links</h3>
+          <h3 data-i18n="quick_links">Quick Links</h3>
           <ul>
-            <li><a href="patient.html">Patient Portal</a></li>
-            <li><a href="staff.html">Staff Portal</a></li>
-            <li><a href="admin.html">Admin Portal</a></li>
-            <li><a href="display.html">Public Display</a></li>
+            <li><a href="patient.html" data-i18n="patient_portal">Patient Portal</a></li>
+            <li><a href="staff.html" data-i18n="staff_portal">Staff Portal</a></li>
+            <li><a href="admin.html" data-i18n="admin_portal">Admin Portal</a></li>
+            <li><a href="display.html" data-i18n="nav_display">Public Display</a></li>
           </ul>
         </div>
         <div class="footer-section">
-          <h3>Contact</h3>
+          <h3 data-i18n="contact">Contact</h3>
           <p>Queen Elizabeth Central Hospital<br>
           Blantyre, Malawi<br>
           Phone: +265 1 871 111</p>

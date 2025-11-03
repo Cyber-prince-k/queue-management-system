@@ -34,51 +34,48 @@
       </div>
 
       <div class="info-banner" style="background: #dbeafe; border-left: 4px solid #2563eb; padding: 1rem; margin-bottom: 1.5rem; border-radius: 8px;">
-        <h3 style="margin-top: 0; color: #1e40af; font-size: 1.1rem;">STAFF CONTROLS</h3>
-        <p style="margin: 0.5rem 0; color: #1e3a8a; line-height: 1.6;">
-          Hospital staff have special access to manage the queues through the system. You can <strong>pause or resume queues</strong>, 
-          <strong>reassign patients</strong> to another department, or <strong>mark patients as attended</strong>. 
-          Every action you perform is updated in the database, ensuring the system always reflects the current situation. 
-          This control feature helps staff maintain order and efficiency in patient handling.
+        <h3 style="margin-top: 0; color: #1e40af; font-size: 1.1rem;" data-i18n="staff_controls_title">STAFF CONTROLS</h3>
+        <p style="margin: 0.5rem 0; color: #1e3a8a; line-height: 1.6;" data-i18n="staff_controls_desc">
+          Hospital staff have special access to manage the queues through the system. You can pause or resume queues, reassign patients to another department, or mark patients as attended. Every action you perform is updated in the database, ensuring the system always reflects the current situation. This control feature helps staff maintain order and efficiency in patient handling.
         </p>
       </div>
 
       <div class="department-selector">
-        <label for="staff-department">Select Department:</label>
+        <label for="staff-department" data-i18n="label_select_department">Select Department:</label>
         <select id="staff-department" name="staff-department">
-          <option value="opd">Outpatient Department (OPD)</option>
-          <option value="maternity">Maternity</option>
-          <option value="emergency">Emergency</option>
-          <option value="pediatrics">Pediatrics</option>
+          <option value="opd" data-i18n="dept_opd">Outpatient Department (OPD)</option>
+          <option value="maternity" data-i18n="dept_maternity">Maternity</option>
+          <option value="emergency" data-i18n="dept_emergency">Emergency</option>
+          <option value="pediatrics" data-i18n="dept_pediatrics">Pediatrics</option>
         </select>
       </div>
 
       <div class="queue-controls">
-        <h3>Queue Management</h3>
+        <h3 data-i18n="queue_management">Queue Management</h3>
         <div class="control-buttons">
-          <button id="call-next-btn" class="btn btn-primary">Call Next Patient</button>
-          <button id="pause-queue-btn" class="btn btn-secondary">Pause Queue</button>
-          <button id="resume-queue-btn" class="btn btn-success">Resume Queue</button>
+          <button id="call-next-btn" class="btn btn-primary" data-i18n="btn_call_next">Call Next Patient</button>
+          <button id="pause-queue-btn" class="btn btn-secondary" data-i18n="btn_pause_queue">Pause Queue</button>
+          <button id="resume-queue-btn" class="btn btn-success" data-i18n="btn_resume_queue">Resume Queue</button>
         </div>
       </div>
 
       <div id="queue-summary" style="background: linear-gradient(135deg, #dbeafe 0%, #e0f2fe 100%); padding: 1rem; border-radius: 12px; margin: 1.5rem 0; display: flex; gap: 2rem; flex-wrap: wrap; justify-content: space-around;">
         <div style="text-align: center;">
           <div style="font-size: 2rem; font-weight: bold; color: #2563eb;" id="total-waiting">0</div>
-          <div style="color: #1e40af; font-size: 0.9rem;">Patients Waiting</div>
+          <div style="color: #1e40af; font-size: 0.9rem;" data-i18n="stats_patients_waiting">Patients Waiting</div>
         </div>
         <div style="text-align: center;">
           <div style="font-size: 2rem; font-weight: bold; color: #10b981;" id="currently-serving">0</div>
-          <div style="color: #065f46; font-size: 0.9rem;">Currently Serving</div>
+          <div style="color: #065f46; font-size: 0.9rem;" data-i18n="stats_currently_serving">Currently Serving</div>
         </div>
         <div style="text-align: center;">
           <div style="font-size: 2rem; font-weight: bold; color: #f59e0b;" id="priority-patients">0</div>
-          <div style="color: #92400e; font-size: 0.9rem;">Priority Cases</div>
+          <div style="color: #92400e; font-size: 0.9rem;" data-i18n="stats_priority_cases">Priority Cases</div>
         </div>
       </div>
 
       <div class="current-queue">
-        <h3>Current Queue <span id="queue-count-badge" style="background: #2563eb; color: white; padding: 0.25rem 0.75rem; border-radius: 12px; font-size: 0.9rem; margin-left: 0.5rem;">0</span></h3>
+        <h3 data-i18n="current_queue">Current Queue <span id="queue-count-badge" style="background: #2563eb; color: white; padding: 0.25rem 0.75rem; border-radius: 12px; font-size: 0.9rem; margin-left: 0.5rem;">0</span></h3>
         <div id="queue-list" class="queue-display" aria-live="polite"></div>
       </div>
     </section>
@@ -88,20 +85,20 @@
     <div class="container">
       <div class="footer-content">
         <div class="footer-section">
-          <h3>About QECH</h3>
-          <p>Queen Elizabeth Central Hospital is Malawi's largest referral hospital, providing quality healthcare services to the nation.</p>
+          <h3 data-i18n="about_qech">About QECH</h3>
+          <p data-i18n="about_qech_desc">Queen Elizabeth Central Hospital is Malawi's largest referral hospital, providing quality healthcare services to the nation.</p>
         </div>
         <div class="footer-section">
-          <h3>Quick Links</h3>
+          <h3 data-i18n="quick_links">Quick Links</h3>
           <ul>
-            <li><a href="patient.html">Patient Portal</a></li>
-            <li><a href="staff.html">Staff Portal</a></li>
-            <li><a href="admin.html">Admin Portal</a></li>
-            <li><a href="display.html">Public Display</a></li>
+            <li><a href="patient.html" data-i18n="patient_portal">Patient Portal</a></li>
+            <li><a href="staff.html" data-i18n="staff_portal">Staff Portal</a></li>
+            <li><a href="admin.html" data-i18n="admin_portal">Admin Portal</a></li>
+            <li><a href="display.html" data-i18n="nav_display">Public Display</a></li>
           </ul>
         </div>
         <div class="footer-section">
-          <h3>Contact</h3>
+          <h3 data-i18n="contact">Contact</h3>
           <p>Queen Elizabeth Central Hospital<br>
           Blantyre, Malawi<br>
           Phone: +265 1 871 111</p>
@@ -110,7 +107,7 @@
       <div class="footer-bottom">
         <p data-i18n="footer_line1">&copy; 2023 Queen Elizabeth Central Hospital - Queue Management System</p>
       
-      y
+      
       </div>
     </div>
   </footer>
@@ -137,9 +134,9 @@
 
     // Handler for marking patient as attended
     async function handleMarkAttended(tokenId, departmentCode) {
-      const confirmed = await showConfirm('Mark this patient as attended?', { 
-        confirmText: 'Mark Attended', 
-        cancelText: 'Cancel' 
+      const confirmed = await showConfirm(t('confirm_mark_attended'), { 
+        confirmText: t('btn_mark_attended'), 
+        cancelText: t('btn_cancel') 
       });
       if (confirmed) {
         const result = await markPatientAttended(tokenId);
@@ -152,10 +149,10 @@
     // Handler for reassigning patient
     async function handleReassign(tokenId, currentDept) {
       const departments = [
-        { code: 'opd', name: 'Outpatient Department (OPD)' },
-        { code: 'maternity', name: 'Maternity' },
-        { code: 'emergency', name: 'Emergency' },
-        { code: 'pediatrics', name: 'Pediatrics' }
+        { code: 'opd', name: t('dept_opd') },
+        { code: 'maternity', name: t('dept_maternity') },
+        { code: 'emergency', name: t('dept_emergency') },
+        { code: 'pediatrics', name: t('dept_pediatrics') }
       ];
       
       const options = departments
@@ -163,7 +160,7 @@
         .map(d => `${d.code}: ${d.name}`)
         .join('\n');
       
-      const newDept = prompt(`Reassign patient to:\n${options}\n\nEnter department code (opd, maternity, emergency, pediatrics):`);
+      const newDept = prompt(`${t('prompt_reassign_to')}\n${options}\n\n${t('prompt_enter_dept_code')}`);
       
       if (newDept && ['opd', 'maternity', 'emergency', 'pediatrics'].includes(newDept.toLowerCase())) {
         const result = await reassignPatient(tokenId, newDept.toLowerCase());
@@ -171,7 +168,7 @@
           await refreshQueueDisplay(currentDept, true);
         }
       } else if (newDept) {
-        showToast('Invalid department code', 'error');
+        showToast(t('err_invalid_department'), 'error');
       }
     }
 
@@ -191,7 +188,7 @@
         refreshQueueDisplay(currentDepartment, true);
       }
       
-      showToast(`Switched to ${formatDepartmentName(currentDepartment)}`, 'info');
+      showToast(t('msg_switched_to') + ' ' + formatDepartmentName(currentDepartment), 'info');
     });
 
     // Call next patient button
@@ -217,7 +214,7 @@
           autoRefreshInterval = null;
         }
         
-        document.getElementById('pause-queue-btn').textContent = 'Queue Paused';
+        document.getElementById('pause-queue-btn').textContent = t('btn_queue_paused');
         document.getElementById('pause-queue-btn').disabled = true;
         document.getElementById('pause-queue-btn').classList.remove('btn-secondary');
         document.getElementById('pause-queue-btn').classList.add('btn-warning');
@@ -236,7 +233,7 @@
         // Start auto-refresh
         autoRefreshInterval = startAutoRefresh(currentDepartment, 10000, true);
         
-        document.getElementById('pause-queue-btn').textContent = 'Pause Queue';
+        document.getElementById('pause-queue-btn').textContent = t('btn_pause_queue');
         document.getElementById('pause-queue-btn').disabled = false;
         document.getElementById('pause-queue-btn').classList.remove('btn-warning');
         document.getElementById('pause-queue-btn').classList.add('btn-secondary');

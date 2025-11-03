@@ -22,7 +22,7 @@
         <ul>
           <li><a class="btn btn-secondary" href="../index.html" data-i18n="nav_home">Home</a></li>
           <li><a class="btn btn-secondary" href="queues.html" data-i18n="nav_queues">Queues</a></li>
-          <li><a class="btn btn-primary" href="profile.html">Profile</a></li>
+          <li><a class="btn btn-primary" href="profile.html" data-i18n="profile">Profile</a></li>
         </ul>
       </nav>
     </div>
@@ -31,29 +31,29 @@
   <main class="container">
     <section class="card" style="max-width:640px;margin:0 auto;">
       <div class="section-header">
-        <h2>My Profile</h2>
+        <h2 data-i18n="my_profile">My Profile</h2>
       </div>
       <form id="profile-form">
         <div class="form-group">
-          <label for="prof-username">Username</label>
+          <label for="prof-username" data-i18n="lbl_username">Username</label>
           <input type="text" id="prof-username" readonly />
         </div>
         <div class="form-group">
-          <label for="prof-name">Full Name</label>
-          <input type="text" id="prof-name" placeholder="Your display name" />
+          <label for="prof-name" data-i18n="lbl_name">Name</label>
+          <input type="text" id="prof-name" placeholder="Your display name" data-i18n="ph_full_name" data-i18n-attr="placeholder" />
         </div>
         <hr />
-        <h3>Change Password</h3>
+        <h3 data-i18n="change_password">Change Password</h3>
         <div class="form-group">
-          <label for="prof-current">Current Password</label>
+          <label for="prof-current" data-i18n="current_password">Current Password</label>
           <input type="password" id="prof-current" />
         </div>
         <div class="form-group">
-          <label for="prof-new">New Password</label>
+          <label for="prof-new" data-i18n="new_password">New Password</label>
           <input type="password" id="prof-new" />
         </div>
         <div class="control-buttons" style="justify-content:flex-end;">
-          <button type="submit" class="btn btn-primary">Save Changes</button>
+          <button type="submit" class="btn btn-primary" data-i18n="save_changes">Save Changes</button>
         </div>
       </form>
     </section>
@@ -63,24 +63,24 @@
     <div class="container">
       <div class="footer-content">
         <div class="footer-section">
-          <h3>About QECH</h3>
-          <p>Queen Elizabeth Central Hospital is Malawi's largest referral hospital, providing quality healthcare services to the nation.</p>
+          <h3 data-i18n="about_qech">About QECH</h3>
+          <p data-i18n="about_qech_desc">Queen Elizabeth Central Hospital is Malawi's largest referral hospital, providing quality healthcare services to the nation.</p>
         </div>
         <div class="footer-section">
-          <h3>Quick Links</h3>
+          <h3 data-i18n="quick_links">Quick Links</h3>
           <ul>
-            <li><a href="patient.html">Patient Portal</a></li>
-            <li><a href="staff.html">Staff Portal</a></li>
-            <li><a href="admin.html">Admin Portal</a></li>
-            <li><a href="display.html">Public Display</a></li>
+            <li><a href="patient.html" data-i18n="patient_portal">Patient Portal</a></li>
+            <li><a href="staff.html" data-i18n="staff_portal">Staff Portal</a></li>
+            <li><a href="admin.html" data-i18n="admin_portal">Admin Portal</a></li>
+            <li><a href="display.html" data-i18n="nav_display">Public Display</a></li>
           </ul>
         </div>
         <div class="footer-section">
-          <h3>Contact</h3>
+          <h3 data-i18n="contact">Contact</h3>
           <p>Queen Elizabeth Central Hospital<br>
           Blantyre, Malawi<br>
           Phone: +265 1 871 111</p>
-      </div>
+        </div>
       <div class="footer-bottom">
         <p data-i18n="footer_line1">&copy; 2023 Queen Elizabeth Central Hospital - Queue Management System</p>
       
