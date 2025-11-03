@@ -51,6 +51,13 @@ const translations = {
         dept_pediatrics: 'Pediatrics',
         footer_line1: '© 2023 Queen Elizabeth Central Hospital - Queue Management System',
         footer_line2: '',
+        // Common messages
+        err_login_required: 'Please login to access this page.',
+        err_access_denied: 'Access denied. You do not have permission to access this page.',
+        err_generate_report: 'Failed to generate report',
+        err_load_stats: 'Failed to load admin stats',
+        err_connect_server: 'Cannot connect to server',
+        err_queue_status: 'Failed to get queue status',
     },
     ny: {
         hospital_name: 'Chipatala cha Mfumukazi Elizabeth',
@@ -82,6 +89,13 @@ const translations = {
         dept_pediatrics: 'Pediatrics',
         footer_line1: '© 2023 Chipatala cha Mfumukazi Elizabeth - Dongosolo Laukadaulo la Mzere',
         footer_line2: '',
+        // Common messages
+        err_login_required: 'Chonde lolani kuti mulowe patsamba ili.',
+        err_access_denied: 'Kulowa kwakanidwa. Mulibe chilolezo cholowera patsamba ili.',
+        err_generate_report: 'Kulephera kupanga lipoti',
+        err_load_stats: 'Kulephera kukweza ziwerengero za admin',
+        err_connect_server: 'Sikulumikizana ndi seva',
+        err_queue_status: 'Kulephera kutenga momwe mizere ilili',
     }
 };
 
@@ -180,6 +194,19 @@ function renderAuthNav() {
                 setTimeout(() => location.href = resolvePath('index.html'), 500);
             }
         });
+
+// Debounce helper
+function debounce(fn, delay){
+    let t; return function(){ clearTimeout(t); t=setTimeout(() => fn.apply(this, arguments), delay||100); };
+}
+
+// Re-apply translations on dynamic DOM changes (e.g., content injections)
+const retranslate = debounce(() => { try { applyTranslations(); } catch(e) {} }, 120);
+const mo = new MutationObserver(() => retranslate());
+try { mo.observe(document.documentElement, { childList: true, subtree: true, characterData: true }); } catch(e) {}
+
+// Ensure once more after full load
+window.addEventListener('load', () => { try { applyTranslations(); } catch(e) {} });
     } else {
         slot.innerHTML = `
             <a class="btn btn-secondary" href="${resolvePath('register.html')}">Create Account</a>
@@ -316,6 +343,38 @@ function applyTranslations() {
     });
     const languageSelect = document.getElementById('language-select');
     if (languageSelect && languageSelect.value !== lang) languageSelect.value = lang;
+
+    // Autoscan: translate elements without data-i18n by matching English text
+    // Build a reverse lookup from English -> target
+    if (lang !== 'en') {
+        const en = translations.en;
+        const rev = {};
+        Object.keys(en).forEach(k => {
+            const enVal = (en[k] || '').trim();
+            const trVal = (dict[k] || '').trim();
+            if (enVal && trVal && enVal !== trVal) rev[enVal] = trVal;
+        });
+
+        // Translate textContent for simple elements not already tagged
+        const nodes = document.querySelectorAll('body *:not([data-i18n])');
+        nodes.forEach(el => {
+            // Skip complex containers; handle simple text nodes/buttons/links/labels
+            const hasChildren = Array.from(el.childNodes).some(n => n.nodeType === 1);
+            if (!hasChildren) {
+                const txt = (el.textContent || '').trim();
+                if (txt && rev[txt]) {
+                    el.textContent = rev[txt];
+                }
+            }
+            // Translate placeholders/titles if they exactly match EN values
+            const ph = el.getAttribute && el.getAttribute('placeholder');
+            if (ph && rev[ph]) el.setAttribute('placeholder', rev[ph]);
+            const ttl = el.getAttribute && el.getAttribute('title');
+            if (ttl && rev[ttl]) el.setAttribute('title', rev[ttl]);
+            const aria = el.getAttribute && el.getAttribute('aria-label');
+            if (aria && rev[aria]) el.setAttribute('aria-label', rev[aria]);
+        });
+    }
 }
 
 function setLanguage(lang) {
@@ -323,6 +382,14 @@ function setLanguage(lang) {
     localStorage.setItem('app_lang', lang);
     applyTranslations();
 }
+
+// Translation helper for use in JS code
+function t(key) {
+    const lang = localStorage.getItem('app_lang') || 'en';
+    const dict = translations[lang] || translations.en;
+    return (dict && dict[key]) || translations.en[key] || key;
+}
+window.t = t;
 
 document.addEventListener('DOMContentLoaded', async () => {
     // Initialize language

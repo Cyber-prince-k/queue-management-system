@@ -163,7 +163,8 @@ async function getQueueStatus(departmentCode = '') {
             return data.tokens;
         } else {
             if (typeof showToast === 'function') {
-                safeToast(data.message || 'Failed to get queue status', 'error');
+                const msg = (data && data.message) ? data.message : (typeof t === 'function' ? t('err_queue_status') : 'Failed to get queue status');
+                safeToast(msg, 'error');
             }
             return [];
         }
@@ -171,7 +172,8 @@ async function getQueueStatus(departmentCode = '') {
         console.error('Get queue status error:', error);
         
         if (error.message.includes('Failed to fetch') && typeof showToast === 'function') {
-            safeToast('Cannot connect to server', 'error');
+            const msg = (typeof t === 'function') ? t('err_connect_server') : 'Cannot connect to server';
+            safeToast(msg, 'error');
         }
         
         return [];
